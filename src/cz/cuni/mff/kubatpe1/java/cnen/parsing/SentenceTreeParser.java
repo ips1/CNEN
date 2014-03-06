@@ -6,6 +6,7 @@
 
 package cz.cuni.mff.kubatpe1.java.cnen.parsing;
 
+import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.SentenceTree;
 import cz.cuni.mff.kubatpe1.java.cnen.*;
 import cz.cuni.mff.kubatpe1.java.cnen.parsing.exceptions.TreeParsingException;
 import java.io.FileInputStream;

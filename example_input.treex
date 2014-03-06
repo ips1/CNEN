@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<treex_document xmlns="http://ufal.mff.cuni.cz/pdt/pml/">
+  <head>
+    <schema href="treex_schema.xml" />
+  </head>
+  <meta>
+    <zones>
+      <zone language="cs">
+        <text>Tanečního studia pardubického divadla</text>
+      </zone>
+    </zones>
+  </meta>
+  <bundles>
+    <LM id="s1">
+      <zones>
+        <zone language="cs">
+          <sentence>Tanečního studia pardubického divadla</sentence>
+          <trees>
+            <a_tree id="a_tree-cs-s1-root">
+              <ord>0</ord>
+              <children id="a_tree-cs-s1-n2">
+                <children>
+                  <LM id="a_tree-cs-s1-n1">
+                    <form>Tanečního</form>
+                    <lemma>taneční-1</lemma>
+                    <tag>AANS2----1A----</tag>
+                    <no_space_after>0</no_space_after>
+                    <ord>1</ord>
+                    <afun>Atr</afun>
+                  </LM>
+                  <LM id="a_tree-cs-s1-n4">
+                    <children id="a_tree-cs-s1-n3">
+                      <form>pardubického</form>
+                      <lemma>pardubický</lemma>
+                      <tag>AANS2----1A----</tag>
+                      <no_space_after>0</no_space_after>
+                      <ord>3</ord>
+                      <afun>Atr</afun>
+                    </children>
+                    <form>divadla</form>
+                    <lemma>divadlo</lemma>
+                    <tag>NNNS2-----A----</tag>
+                    <no_space_after>1</no_space_after>
+                    <ord>4</ord>
+                    <afun>Atr</afun>
+                  </LM>
+                </children>
+                <form>studia</form>
+                <lemma>studium</lemma>
+                <tag>NNNS2-----A----</tag>
+                <no_space_after>0</no_space_after>
+                <ord>2</ord>
+                <afun>ExD</afun>
+              </children>
+            </a_tree>
+          </trees>
+        </zone>
+      </zones>
+    </LM>
+  </bundles>
+</treex_document>

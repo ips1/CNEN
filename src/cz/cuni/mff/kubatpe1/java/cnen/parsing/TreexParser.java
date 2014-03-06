@@ -6,10 +6,11 @@
 
 package cz.cuni.mff.kubatpe1.java.cnen.parsing;
 
-import cz.cuni.mff.kubatpe1.java.cnen.SentenceTree;
-import cz.cuni.mff.kubatpe1.java.cnen.Tag;
-import cz.cuni.mff.kubatpe1.java.cnen.TreeNode;
+import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.SentenceTree;
+import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.Tag;
+import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.TreeNode;
 import cz.cuni.mff.kubatpe1.java.cnen.parsing.exceptions.TreeParsingException;
+import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.exceptions.InvalidTagException;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -37,7 +38,9 @@ public class TreexParser implements SentenceTreeParser {
     private static final String LEMMA_ELEM = "lemma";
     private static final String TAG_ELEM = "tag";
     private static final String ORD_ELEM = "ord";
+    private static final String NO_SPACE_ELEM = "no_space_after";
     
+    private static final String DEF_TAG = "---------------";
     
     @Override
     public SentenceTree parseTree(String path) throws TreeParsingException {
@@ -103,9 +106,11 @@ public class TreexParser implements SentenceTreeParser {
         NodeList subElems = elem.getChildNodes();
         
         int order = 0;
+        boolean spaceAfter = false;
+        
         String content = "";
         String lemma = "";
-        String tagString = "";
+        String tagString = DEF_TAG;
         
         Element childrenElement = null;
         
@@ -141,11 +146,29 @@ public class TreexParser implements SentenceTreeParser {
                 case LEMMA_ELEM:
                     lemma = getNodeContent(current);
                     break;
+                case TAG_ELEM:
+                    tagString = getNodeContent(current);
+                    break;
+                case NO_SPACE_ELEM:
+                    try {
+                        spaceAfter = Integer.parseInt(getNodeContent(current)) <= 0;
+                    }
+                    catch (NumberFormatException ex) {
+                        throw new TreeParsingException(ex);
+                    }   
             }
                    
         }
         
-        TreeNode currentNode = new TreeNode(id, order, content, lemma, new Tag(tagString));
+        Tag t;
+        try {
+            t = new Tag(tagString);
+        } 
+        catch (InvalidTagException ex) {
+            throw new TreeParsingException(ex);
+        }
+        
+        TreeNode currentNode = new TreeNode(id, order, spaceAfter, content, lemma, t);
         
         // If contains children element, we have to parse children
         if (childrenElement != null) {

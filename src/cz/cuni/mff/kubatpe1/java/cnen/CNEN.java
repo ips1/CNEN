@@ -6,6 +6,7 @@
 
 package cz.cuni.mff.kubatpe1.java.cnen;
 
+import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.SentenceTree;
 import cz.cuni.mff.kubatpe1.java.cnen.parsing.SentenceTreeParser;
 import cz.cuni.mff.kubatpe1.java.cnen.parsing.TreexParser;
 import cz.cuni.mff.kubatpe1.java.cnen.parsing.exceptions.TreeParsingException;
@@ -24,9 +25,11 @@ public class CNEN {
         
         SentenceTreeParser tp = new TreexParser();
         
-        SentenceTree tree = tp.parseTree("C:\\Users\\Petr\\Documents\\NetBeansProjects\\CNEN\\example_input.treex");
+        SentenceTree tree = tp.parseTree("example_input.treex");
         
         System.out.println("Hi der!");
+        
+        System.out.println(tree);
     }
     
 }
