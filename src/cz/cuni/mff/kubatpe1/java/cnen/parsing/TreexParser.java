@@ -122,23 +122,24 @@ public class TreexParser implements SentenceTreeParser {
             // Processing the element
             switch (elemName) {
                 case CHILDREN_ELEM:
-                    if (childrenElement == null) {
+                    if (childrenElement != null) {
                         throw new TreeParsingException("Element contains two children subelements");
-                    }   childrenElement = (Element)current;
+                    }   
+                    childrenElement = (Element)current;
                     break;
                 case ORD_ELEM:
                     try {
-                        order = Integer.parseInt(current.getNodeValue());
+                        order = Integer.parseInt(getNodeContent(current));
                     }
                     catch (NumberFormatException ex) {
                         throw new TreeParsingException(ex);
                     }   
                     break;
                 case FORM_ELEM:
-                    content = current.getNodeValue();
+                    content = getNodeContent(current);
                     break;
                 case LEMMA_ELEM:
-                    lemma = current.getNodeValue();
+                    lemma = getNodeContent(current);
                     break;
             }
                    
@@ -157,7 +158,7 @@ public class TreexParser implements SentenceTreeParser {
             else {
                 NodeList children = childrenElement.getChildNodes();
                 for (int i = 0; i < children.getLength(); i++) {
-                    Node n = subElems.item(i);            
+                    Node n = children.item(i);            
                     // Node not an element
                     if (n.getNodeType() != Node.ELEMENT_NODE) {
                         continue;
@@ -172,6 +173,14 @@ public class TreexParser implements SentenceTreeParser {
         return currentNode;
         
         
+    }
+    
+    private String getNodeContent(Node n) throws TreeParsingException {
+        NodeList childNodes = n.getChildNodes();
+        if (childNodes.getLength() != 1) {
+            throw new TreeParsingException("Invalid element content");
+        }
+        return (childNodes.item(0).getNodeValue());
     }
     
 }
