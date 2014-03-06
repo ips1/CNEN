@@ -12,6 +12,10 @@ package cz.cuni.mff.kubatpe1.java.cnen;
  */
 public class SentenceTree {
     private TreeNode root;
+
+    public SentenceTree(TreeNode root) {
+        this.root = root;
+    }
     
     
 }

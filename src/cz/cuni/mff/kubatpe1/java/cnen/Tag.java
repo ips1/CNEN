@@ -11,5 +11,10 @@ package cz.cuni.mff.kubatpe1.java.cnen;
  * @author Petr
  */
 public class Tag {
+
+    // Constructor which parses the tag from string representation
+    public Tag(String str) {
+    }
+    
     
 }
