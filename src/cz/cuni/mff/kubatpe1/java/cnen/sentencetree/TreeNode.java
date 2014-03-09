@@ -53,6 +53,18 @@ public class TreeNode {
         return order;
     }
     
+    public Tag getTag() {
+        return tag;
+    }
+    
+    public String getLemma() {
+        return lemma;
+    }
+    
+    public void setContent(String content) {
+        this.content = content;
+    }
+    
     @Override
     public String toString() {
         if (spaceAfter) {

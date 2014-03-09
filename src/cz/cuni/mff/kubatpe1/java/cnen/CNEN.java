@@ -6,10 +6,16 @@
 
 package cz.cuni.mff.kubatpe1.java.cnen;
 
+import cz.cuni.mff.kubatpe1.java.cnen.actions.BasicRecursiveNormalizer;
+import cz.cuni.mff.kubatpe1.java.cnen.actions.TreeAction;
+import cz.cuni.mff.kubatpe1.java.cnen.actions.TreeActionException;
+import cz.cuni.mff.kubatpe1.java.cnen.morphology.ManualGenerator;
 import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.SentenceTree;
 import cz.cuni.mff.kubatpe1.java.cnen.parsing.SentenceTreeParser;
 import cz.cuni.mff.kubatpe1.java.cnen.parsing.TreexParser;
 import cz.cuni.mff.kubatpe1.java.cnen.parsing.exceptions.TreeParsingException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -27,7 +33,12 @@ public class CNEN {
         
         SentenceTree tree = tp.parseTree("example_input.treex");
         
-        System.out.println("Hi der!");
+        TreeAction act = new BasicRecursiveNormalizer(true, new ManualGenerator());
+        try {
+            act.runOnTree(tree);
+        } catch (TreeActionException ex) {
+            System.err.println("TreeAction error!");
+        }
         
         System.out.println(tree);
     }

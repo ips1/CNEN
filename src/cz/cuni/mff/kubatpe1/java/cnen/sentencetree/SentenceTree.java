@@ -23,6 +23,10 @@ public class SentenceTree {
         this.nodeCount = root.getChildCount() + 1;
     }
     
+    public TreeNode getRoot() {
+        return root;
+    }
+    
     public List<TreeNode> getLinearRepresentation() {
         List<TreeNode> list = new ArrayList<TreeNode>();
         

@@ -16,19 +16,19 @@ public class Tag {
     
     private static final int count = 15;
 
-    private char wordClass;
-    private char wordSubClass;
-    private char gender;
-    private char number;
-    private char grCase;
-    private char possesiveGender;
-    private char possesiveNumber;
-    private char person;
-    private char tense;
-    private char degree;
-    private char negation;
-    private char activity;
-    private char variant;
+    public char wordClass;
+    public char wordSubClass;
+    public char gender;
+    public char number;
+    public char grCase;
+    public char possesiveGender;
+    public char possesiveNumber;
+    public char person;
+    public char tense;
+    public char degree;
+    public char negation;
+    public char activity;
+    public char variant;
     
     // Constructor which parses the tag from string representation
     public Tag(String str) throws InvalidTagException {
@@ -55,6 +55,28 @@ public class Tag {
         activity = str.charAt(11);
         variant = str.charAt(14);
         
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(wordClass);
+        sb.append(wordSubClass);
+        sb.append(gender);
+        sb.append(number);
+        sb.append(grCase);
+        sb.append(possesiveGender);
+        sb.append(possesiveNumber);
+        sb.append(person);
+        sb.append(tense);
+        sb.append(degree);
+        sb.append(negation);
+        sb.append(activity);
+        sb.append('-');
+        sb.append('-');
+        sb.append(variant);
+
+        return sb.toString();
     }
     
 }
