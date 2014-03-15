@@ -10,6 +10,7 @@ import cz.cuni.mff.kubatpe1.java.cnen.actions.BasicRecursiveNormalizer;
 import cz.cuni.mff.kubatpe1.java.cnen.actions.TreeAction;
 import cz.cuni.mff.kubatpe1.java.cnen.actions.TreeActionException;
 import cz.cuni.mff.kubatpe1.java.cnen.morphology.ManualGenerator;
+import cz.cuni.mff.kubatpe1.java.cnen.morphology.MorphoditaGenerator;
 import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.SentenceTree;
 import cz.cuni.mff.kubatpe1.java.cnen.parsing.SentenceTreeParser;
 import cz.cuni.mff.kubatpe1.java.cnen.parsing.TreexParser;
@@ -33,7 +34,13 @@ public class CNEN {
         
         SentenceTree tree = tp.parseTree("example_input.treex");
         
-        TreeAction act = new BasicRecursiveNormalizer(true, new ManualGenerator());
+        String oldPath = System.getProperty("java.library.path");
+        
+        String newPath = "/home/ips/Bakalarka/morphodita-master/bindings/java" + ":" + oldPath;
+        
+        System.setProperty("java.library.path", newPath);                
+        
+        TreeAction act = new BasicRecursiveNormalizer(true, new MorphoditaGenerator("/home/ips/Bakalarka/morphodita-master/131112/czech-morfflex-131112-raw_lemmas.dict"));
         try {
             act.runOnTree(tree);
         } catch (TreeActionException ex) {

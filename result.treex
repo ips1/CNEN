@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<treex_document xmlns="http://ufal.mff.cuni.cz/pdt/pml/">
+  <head>
+    <schema href="treex_schema.xml" />
+  </head>
+  <meta>
+    <zones>
+      <zone language="cs">
+        <text>Českého svazu bojovníků za svobodu</text>
+      </zone>
+    </zones>
+  </meta>
+  <bundles>
+    <LM id="s1">
+      <zones>
+        <zone language="cs">
+          <sentence>Českého svazu bojovníků za svobodu</sentence>
+          <trees>
+            <a_tree id="a_tree-cs-s1-root">
+              <ord>0</ord>
+              <children id="a_tree-cs-s1-n2">
+                <children>
+                  <LM id="a_tree-cs-s1-n1">
+                    <form>Českého</form>
+                    <lemma>český</lemma>
+                    <tag>AAIS2----1A----</tag>
+                    <no_space_after>0</no_space_after>
+                    <ord>1</ord>
+                    <afun>Atr</afun>
+                  </LM>
+                  <LM id="a_tree-cs-s1-n3">
+                    <children id="a_tree-cs-s1-n4">
+                      <children id="a_tree-cs-s1-n5">
+                        <form>svobodu</form>
+                        <lemma>svoboda</lemma>
+                        <tag>NNFS4-----A----</tag>
+                        <no_space_after>1</no_space_after>
+                        <ord>5</ord>
+                        <afun>Atr</afun>
+                      </children>
+                      <form>za</form>
+                      <lemma>za-1</lemma>
+                      <tag>RR--4----------</tag>
+                      <no_space_after>0</no_space_after>
+                      <ord>4</ord>
+                      <afun>AuxP</afun>
+                    </children>
+                    <form>bojovníků</form>
+                    <lemma>bojovník</lemma>
+                    <tag>NNMP2-----A----</tag>
+                    <no_space_after>0</no_space_after>
+                    <ord>3</ord>
+                    <afun>Atr</afun>
+                  </LM>
+                </children>
+                <form>svazu</form>
+                <lemma>svaz</lemma>
+                <tag>NNIS2-----A----</tag>
+                <no_space_after>0</no_space_after>
+                <ord>2</ord>
+                <afun>ExD</afun>
+              </children>
+            </a_tree>
+          </trees>
+        </zone>
+      </zones>
+    </LM>
+  </bundles>
+</treex_document>

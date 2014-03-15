@@ -18,4 +18,5 @@ import java.io.FileInputStream;
  */
 public interface SentenceTreeParser {
     SentenceTree parseTree(String path) throws TreeParsingException;
+    //SentenceTree parseTree(InputStream is) throws TreeParsingException;
 }
