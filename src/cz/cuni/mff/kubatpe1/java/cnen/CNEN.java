@@ -34,11 +34,13 @@ public class CNEN {
         
         SentenceTree tree = tp.parseTree("example_input.treex");
         
+        /*
         String oldPath = System.getProperty("java.library.path");
         
         String newPath = "/home/ips/Bakalarka/morphodita-master/bindings/java" + ":" + oldPath;
         
-        System.setProperty("java.library.path", newPath);                
+        System.setProperty("java.library.path", newPath);  
+        */
         
         TreeAction act = new BasicRecursiveNormalizer(true, new MorphoditaGenerator("/home/ips/Bakalarka/morphodita-master/131112/czech-morfflex-131112-raw_lemmas.dict"));
         try {
