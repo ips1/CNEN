@@ -26,11 +26,11 @@ public class ExternalProcessGenerator implements MorphologyGenerator {
     BufferedReader processOutput;
     PrintWriter processInput;
     
-    public ExternalProcessGenerator(String path) throws MorphologyLoadingException {
+    public ExternalProcessGenerator(String path, String dictPath) throws MorphologyLoadingException {
         this.path = path;
         // TODO: Exception handling
         try {
-            this.process = new ProcessBuilder(path).start();          
+            this.process = new ProcessBuilder(path, dictPath, "1").start();          
         } catch (IOException ex) {
             throw new MorphologyLoadingException(ex);
         }
@@ -42,10 +42,11 @@ public class ExternalProcessGenerator implements MorphologyGenerator {
     
     @Override
     public String generateForTag(String word, Tag targetTag) {
-        processInput.printf("%s\t%s", word, targetTag.toString());
+        processInput.printf("%s\t%s\n", word, targetTag.toString());
+        processInput.flush();
         String out;
         try {
-            out = processOutput.readLine();
+             out = processOutput.readLine();
         } catch (IOException ex) {
             // TODO: throw new MorphologyGeneratingException();
             return "";            

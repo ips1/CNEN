@@ -9,12 +9,15 @@ package cz.cuni.mff.kubatpe1.java.cnen;
 import cz.cuni.mff.kubatpe1.java.cnen.actions.BasicRecursiveNormalizer;
 import cz.cuni.mff.kubatpe1.java.cnen.actions.TreeAction;
 import cz.cuni.mff.kubatpe1.java.cnen.actions.TreeActionException;
+import cz.cuni.mff.kubatpe1.java.cnen.morphology.ExternalProcessGenerator;
 import cz.cuni.mff.kubatpe1.java.cnen.morphology.ManualGenerator;
 import cz.cuni.mff.kubatpe1.java.cnen.morphology.MorphoditaGenerator;
+import cz.cuni.mff.kubatpe1.java.cnen.morphology.exceptions.MorphologyLoadingException;
 import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.SentenceTree;
 import cz.cuni.mff.kubatpe1.java.cnen.parsing.SentenceTreeParser;
 import cz.cuni.mff.kubatpe1.java.cnen.parsing.TreexParser;
 import cz.cuni.mff.kubatpe1.java.cnen.parsing.exceptions.TreeParsingException;
+import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,12 +30,17 @@ public class CNEN {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) throws TreeParsingException {
+    public static void main(String[] args) throws TreeParsingException, MorphologyLoadingException {
         // TODO code application logic here
+        
+        if (args.length < 1) {
+            System.err.println("Input file must be specified!");
+            return;
+        }
         
         SentenceTreeParser tp = new TreexParser();
         
-        SentenceTree tree = tp.parseTree("example_input.treex");
+        SentenceTree tree = tp.parseTree(args[0]);
         
         /*
         String oldPath = System.getProperty("java.library.path");
@@ -42,7 +50,11 @@ public class CNEN {
         System.setProperty("java.library.path", newPath);  
         */
         
-        TreeAction act = new BasicRecursiveNormalizer(true, new MorphoditaGenerator("/home/ips/Bakalarka/morphodita-master/131112/czech-morfflex-131112-raw_lemmas.dict"));
+        //TreeAction act = new BasicRecursiveNormalizer(true, new MorphoditaGenerator("/home/ips/Bakalarka/morphodita-master/131112/czech-morfflex-131112-raw_lemmas.dict"));
+        
+        TreeAction act = new BasicRecursiveNormalizer(true, new MorphoditaGenerator("czech-morfflex-131112.dict"));
+
+        
         try {
             act.runOnTree(tree);
         } catch (TreeActionException ex) {

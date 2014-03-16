@@ -125,37 +125,36 @@ public class TreexParser implements SentenceTreeParser {
             
             String elemName = current.getNodeName();
             // Processing the element
-            switch (elemName) {
-                case CHILDREN_ELEM:
-                    if (childrenElement != null) {
-                        throw new TreeParsingException("Element contains two children subelements");
-                    }   
-                    childrenElement = (Element)current;
-                    break;
-                case ORD_ELEM:
-                    try {
-                        order = Integer.parseInt(getNodeContent(current));
-                    }
-                    catch (NumberFormatException ex) {
-                        throw new TreeParsingException(ex);
-                    }   
-                    break;
-                case FORM_ELEM:
-                    content = getNodeContent(current);
-                    break;
-                case LEMMA_ELEM:
-                    lemma = getNodeContent(current);
-                    break;
-                case TAG_ELEM:
-                    tagString = getNodeContent(current);
-                    break;
-                case NO_SPACE_ELEM:
-                    try {
-                        spaceAfter = Integer.parseInt(getNodeContent(current)) <= 0;
-                    }
-                    catch (NumberFormatException ex) {
-                        throw new TreeParsingException(ex);
-                    }   
+            if(elemName.equals(CHILDREN_ELEM)) {
+                if (childrenElement != null) {
+                    throw new TreeParsingException("Element contains two children subelements");
+                }   
+                childrenElement = (Element)current;
+            }
+            else if(elemName.equals(ORD_ELEM)) {
+                try {
+                    order = Integer.parseInt(getNodeContent(current));
+                }
+                catch (NumberFormatException ex) {
+                    throw new TreeParsingException(ex);
+                }   
+            }
+            else if(elemName.equals(FORM_ELEM)) {
+                content = getNodeContent(current);
+            }
+            else if(elemName.equals(LEMMA_ELEM)) {
+                lemma = getNodeContent(current);
+            }
+            else if(elemName.equals(TAG_ELEM)) {
+                tagString = getNodeContent(current);
+            }
+            else if(elemName.equals(NO_SPACE_ELEM)) {
+                try {
+                    spaceAfter = Integer.parseInt(getNodeContent(current)) <= 0;
+                }
+                catch (NumberFormatException ex) {
+                    throw new TreeParsingException(ex);
+                }   
             }
                    
         }
