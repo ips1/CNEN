@@ -38,9 +38,15 @@ public class CNEN {
             return;
         }
         
+
+        System.out.println(normalize(args[0]));
+    }
+    
+    public static String normalize(String inputFile) throws TreeParsingException {
+        
         SentenceTreeParser tp = new TreexParser();
         
-        SentenceTree tree = tp.parseTree(args[0]);
+        SentenceTree tree = tp.parseTree(inputFile);
         
         /*
         String oldPath = System.getProperty("java.library.path");
@@ -58,10 +64,9 @@ public class CNEN {
         try {
             act.runOnTree(tree);
         } catch (TreeActionException ex) {
-            System.err.println("TreeAction error!");
+            System.err.println("TreeAction error: " + ex.getMessage());
         }
         
-        System.out.println(tree);
-    }
-    
+        return tree.toString();
+    }    
 }

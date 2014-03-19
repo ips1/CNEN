@@ -7,9 +7,12 @@
 package cz.cuni.mff.kubatpe1.java.cnen.actions;
 
 import cz.cuni.mff.kubatpe1.java.cnen.morphology.MorphologyGenerator;
+import cz.cuni.mff.kubatpe1.java.cnen.morphology.exceptions.MorphologyGeneratingException;
 import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.SentenceTree;
 import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.Tag;
 import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.TreeNode;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -30,7 +33,7 @@ public class BasicRecursiveNormalizer implements TreeAction {
     
     /**
      * Performs basic recursive normalization on a tree
-     * @param t Tree to be modyfied
+     * @param t Tree to be modified
      */
     @Override
     public void runOnTree(SentenceTree t) throws TreeActionException {
@@ -57,9 +60,22 @@ public class BasicRecursiveNormalizer implements TreeAction {
     } 
     
     private void rootAction(TreeNode root) throws TreeActionException {
+        // Conjunctions have to be skipped
+        if (root.getTag().wordClass == 'J') {
+            for (TreeNode n: root.getChildren()) {
+                rootAction(n);
+            }   
+            return;
+        }
+        
         normalizeTag(root.getTag());
         
-        String newWord = mg.generateForTag(root.getLemma(), root.getTag());
+        String newWord = root.getContent();
+        try {
+            newWord = mg.generateForTag(root.getLemma(), root.getTag());
+        } catch (MorphologyGeneratingException ex) {
+            System.err.println(ex.getMessage());
+        }
         
         root.setContent(newWord);
         
@@ -67,13 +83,26 @@ public class BasicRecursiveNormalizer implements TreeAction {
     }
     
     private void leftChildAction(TreeNode child, TreeNode parent) throws TreeActionException {
+        // Conjunctions have to be skipped
+        if (child.getTag().wordClass == 'J') {
+            for (TreeNode n: child.getChildren()) {
+                leftChildAction(n, parent);
+            }
+            return;
+        }
+        
         Tag parentTag = parent.getTag();
         Tag childTag = child.getTag();
         
         childTag.grCase = parentTag.grCase;
         childTag.number = parentTag.number;
         
-        String newWord = mg.generateForTag(child.getLemma(), childTag);
+        String newWord = child.getContent();
+        try {
+            newWord = mg.generateForTag(child.getLemma(), childTag);
+        } catch (MorphologyGeneratingException ex) {
+            System.err.println(ex.getMessage());
+        }
         
         child.setContent(newWord);
         

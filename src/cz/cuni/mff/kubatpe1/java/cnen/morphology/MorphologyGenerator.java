@@ -6,6 +6,7 @@
 
 package cz.cuni.mff.kubatpe1.java.cnen.morphology;
 
+import cz.cuni.mff.kubatpe1.java.cnen.morphology.exceptions.MorphologyGeneratingException;
 import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.Tag;
 
 /**
@@ -13,5 +14,5 @@ import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.Tag;
  * @author Petr
  */
 public interface MorphologyGenerator {
-    public String generateForTag(String word, Tag targetTag);
+    public String generateForTag(String word, Tag targetTag) throws MorphologyGeneratingException;
 }
