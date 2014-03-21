@@ -22,11 +22,12 @@ public class BasicRecursiveNormalizer implements TreeAction {
 
     private boolean singular;
     private MorphologyGenerator mg = null;
-
+    private CaseMatcher caseMatcher;
 
     public BasicRecursiveNormalizer(boolean singular, MorphologyGenerator mg) {
         this.singular = singular;
         this.mg = mg;
+        this.caseMatcher = new CaseMatcher();
     }
     
     
@@ -70,6 +71,7 @@ public class BasicRecursiveNormalizer implements TreeAction {
         
         normalizeTag(root.getTag());
         
+        String oldWord = root.getContent();
         String newWord = root.getContent();
         try {
             newWord = mg.generateForTag(root.getLemma(), root.getTag());
@@ -77,7 +79,7 @@ public class BasicRecursiveNormalizer implements TreeAction {
             System.err.println(ex.getMessage());
         }
         
-        root.setContent(newWord);
+        root.setContent(caseMatcher.matchCase(oldWord, newWord));
         
         applyOnChildren(root);
     }
@@ -97,6 +99,7 @@ public class BasicRecursiveNormalizer implements TreeAction {
         childTag.grCase = parentTag.grCase;
         childTag.number = parentTag.number;
         
+        String oldWord = child.getContent();
         String newWord = child.getContent();
         try {
             newWord = mg.generateForTag(child.getLemma(), childTag);
@@ -104,7 +107,7 @@ public class BasicRecursiveNormalizer implements TreeAction {
             System.err.println(ex.getMessage());
         }
         
-        child.setContent(newWord);
+        child.setContent(caseMatcher.matchCase(oldWord, newWord));
         
         applyOnChildren(child);
     }
