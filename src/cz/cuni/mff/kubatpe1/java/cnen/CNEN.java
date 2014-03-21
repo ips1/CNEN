@@ -18,6 +18,8 @@ import cz.cuni.mff.kubatpe1.java.cnen.parsing.SentenceTreeParser;
 import cz.cuni.mff.kubatpe1.java.cnen.parsing.TreexParser;
 import cz.cuni.mff.kubatpe1.java.cnen.parsing.exceptions.TreeParsingException;
 import java.io.File;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,8 +32,13 @@ public class CNEN {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) throws TreeParsingException, MorphologyLoadingException {
+    public static void main(String[] args) throws TreeParsingException, MorphologyLoadingException, UnsupportedEncodingException {
         // TODO code application logic here
+        System.setProperty("file.encoding", "utf-8");
+        PrintStream out = new PrintStream(System.out, true, "UTF-8");
+
+
+        
         
         if (args.length < 1) {
             System.err.println("Input file must be specified!");
@@ -39,7 +46,7 @@ public class CNEN {
         }
         
 
-        System.out.println(normalize(args[0]));
+        out.println(normalize(args[0]));
     }
     
     public static String normalize(String inputFile) throws TreeParsingException {
