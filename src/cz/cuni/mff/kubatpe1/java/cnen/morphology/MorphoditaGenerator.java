@@ -9,6 +9,7 @@ package cz.cuni.mff.kubatpe1.java.cnen.morphology;
 import cz.cuni.mff.kubatpe1.java.cnen.morphology.exceptions.MorphologyGeneratingException;
 import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.Tag;
 import cz.cuni.mff.ufal.morphodita.*;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -25,8 +26,8 @@ public class MorphoditaGenerator implements MorphologyGenerator {
     
     @Override
     public String generateForTag(String word, Tag targetTag) throws MorphologyGeneratingException {
-        String[] parts = word.split("-");
-        String cleanLemma = parts[0];
+        String cleanLemma = parseLemma(word);
+
         TaggedLemmasForms lemmasForms = new TaggedLemmasForms();
         String tagString = targetTag.toString();
         morphology.generate(cleanLemma, tagString, 1, lemmasForms);
@@ -34,9 +35,46 @@ public class MorphoditaGenerator implements MorphologyGenerator {
         if (lemmasForms.isEmpty()) {
             throw new MorphologyGeneratingException("Can't generate " + tagString + " for " + cleanLemma);
         }
-        TaggedLemmaForms lemmaForms = lemmasForms.get(0);
-        return (lemmaForms.getForms().get(0).getForm());
+        TaggedForms taggedForms = lemmasForms.get(0).getForms();
+        if (lemmasForms.isEmpty()) {
+            throw new MorphologyGeneratingException("Can't generate " + tagString + " for " + cleanLemma);
+        }
+        return (taggedForms.get(0).getForm());
         // TODO - one more check
+    }
+    
+    /**
+     * Parses the lemma and returns the raw lemma.
+     * @param originalLemma Original lemma generated with morphology containing additional tags
+     * @return Clean lemma
+     */
+    public String parseLemma(String originalLemma) {
+        String[] additionSeparators = {"_:", "_;", "_,", "_^"};
+        
+        String currentString = originalLemma;
+        
+        for (String s: additionSeparators) {
+            String[] parts = currentString.split(Pattern.quote(s));
+            currentString = parts[0];
+        }
+        
+        String[] finalParts = currentString.split("-");
+        
+        try {
+            Integer.parseInt(finalParts[finalParts.length - 1]);
+            // Integer parsing was succesful - last part is not part of the raw lemma
+            StringBuilder sb = new StringBuilder(finalParts[0]);
+            for (int i = 1; i < finalParts.length - 1; i++) {
+                sb.append("-");
+                sb.append(finalParts[i]);
+            }
+            currentString = sb.toString();
+        }
+        catch (NumberFormatException ex) {
+            
+        }
+        
+        return currentString;
     }
     
 }
