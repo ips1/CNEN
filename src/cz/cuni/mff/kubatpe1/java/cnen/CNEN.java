@@ -20,6 +20,7 @@ import cz.cuni.mff.kubatpe1.java.cnen.parsing.exceptions.TreeParsingException;
 import java.io.File;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,7 +54,14 @@ public class CNEN {
         
         SentenceTreeParser tp = new TreexParser();
         
-        SentenceTree tree = tp.parseTree(inputFile);
+        List<SentenceTree> treeList = tp.parseTree(inputFile);
+        
+        if (treeList.size() != 1) {
+            // Error - more than one sentence!
+            // TODO: FIX THIS!!!!
+            
+            
+        }
         
         /*
         String oldPath = System.getProperty("java.library.path");
@@ -65,15 +73,18 @@ public class CNEN {
         
         //TreeAction act = new BasicRecursiveNormalizer(true, new MorphoditaGenerator("/home/ips/Bakalarka/morphodita-master/131112/czech-morfflex-131112-raw_lemmas.dict"));
         
-        TreeAction act = new BasicRecursiveNormalizer(truz, new MorphoditaGenerator("czech-morfflex-131112.dict"));
+        TreeAction act = new BasicRecursiveNormalizer(false, new MorphoditaGenerator("czech-morfflex-131112.dict"));
 
-        
-        try {
-            act.runOnTree(tree);
-        } catch (TreeActionException ex) {
-            System.err.println("TreeAction error: " + ex.getMessage());
+        StringBuilder result = new StringBuilder();
+        for (SentenceTree tree: treeList) {
+            try {
+                act.runOnTree(tree);
+            } catch (TreeActionException ex) {
+                System.err.println("TreeAction error: " + ex.getMessage());
+            }
+            result.append(tree.toString());
         }
         
-        return tree.toString();
+        return result.toString();
     }    
 }

@@ -10,6 +10,7 @@ import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.SentenceTree;
 import cz.cuni.mff.kubatpe1.java.cnen.*;
 import cz.cuni.mff.kubatpe1.java.cnen.parsing.exceptions.TreeParsingException;
 import java.io.FileInputStream;
+import java.util.List;
 
 
 /**
@@ -17,6 +18,6 @@ import java.io.FileInputStream;
  * @author Petr
  */
 public interface SentenceTreeParser {
-    SentenceTree parseTree(String path) throws TreeParsingException;
+    List<SentenceTree> parseTree(String path) throws TreeParsingException;
     //SentenceTree parseTree(InputStream is) throws TreeParsingException;
 }

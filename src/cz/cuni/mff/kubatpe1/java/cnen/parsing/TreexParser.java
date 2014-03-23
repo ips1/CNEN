@@ -13,6 +13,8 @@ import cz.cuni.mff.kubatpe1.java.cnen.parsing.exceptions.TreeParsingException;
 import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.exceptions.InvalidTagException;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
@@ -43,11 +45,9 @@ public class TreexParser implements SentenceTreeParser {
     private static final String DEF_TAG = "---------------";
     
     @Override
-    public SentenceTree parseTree(String path) throws TreeParsingException {
+    public List<SentenceTree> parseTree(String path) throws TreeParsingException {
         Document doc = loadDOM(path);
-        SentenceTree t = parseDOM(doc);
-        
-        return t;
+        return parseDOM(doc);
     }
     
     private Document loadDOM(String path) throws TreeParsingException {
@@ -78,20 +78,24 @@ public class TreexParser implements SentenceTreeParser {
      * @return Parsed sentence tree
      * @throws TreeParsingException Document can't be parsed
      */
-    private SentenceTree parseDOM(Document doc) throws TreeParsingException {
+    private List<SentenceTree> parseDOM(Document doc) throws TreeParsingException {
         // Searching for a root element
         NodeList rootList = doc.getElementsByTagName(TREE_ROOT);
-        // Document must have exactly one root
-        if (rootList.getLength() != 1) throw new TreeParsingException();
         
-        Element root = (Element)rootList.item(0);
+        ArrayList<SentenceTree> treeList = new ArrayList<SentenceTree>();
         
-        // Parsing node from root element
-        TreeNode rootNode = fetchNode(root);
+        for (int i = 0; i < rootList.getLength(); i++) {
+            Element root = (Element)rootList.item(i);
+
+            // Parsing node from root element
+            TreeNode rootNode = fetchNode(root);
+
+            SentenceTree tree = new SentenceTree(rootNode);
+            
+            treeList.add(tree);
+        }
         
-        SentenceTree tree = new SentenceTree(rootNode);
-        
-        return tree;
+        return treeList;
     }
     
     /**
