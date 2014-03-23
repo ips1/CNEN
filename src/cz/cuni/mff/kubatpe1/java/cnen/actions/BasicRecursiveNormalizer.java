@@ -20,12 +20,12 @@ import java.util.logging.Logger;
  */
 public class BasicRecursiveNormalizer implements TreeAction {
 
-    private boolean singular;
+    private boolean toSingular;
     private MorphologyGenerator mg = null;
     private CaseMatcher caseMatcher;
 
-    public BasicRecursiveNormalizer(boolean singular, MorphologyGenerator mg) {
-        this.singular = singular;
+    public BasicRecursiveNormalizer(boolean toSingular, MorphologyGenerator mg) {
+        this.toSingular = toSingular;
         this.mg = mg;
         this.caseMatcher = new CaseMatcher();
     }
@@ -52,20 +52,43 @@ public class BasicRecursiveNormalizer implements TreeAction {
      */
     private void normalizeTag(Tag t) {
         t.grCase = '1';
-        if (singular) {
+        if (toSingular) {
             t.number = 'S';
-        }
-        else {
-            t.number = 'P';
         }
     } 
     
+    /**
+     * Finds out whether the specified tag is in normalized form.
+     * @param t Tag to be checked
+     * @return True if the tag is in 1st case (and singular if required)
+     */
+    private boolean isNormalizedTag(Tag t) {
+        boolean normalized = true;
+        if (t.grCase != '1') {
+            normalized = false;
+        }
+        if (toSingular && !t.isSingular()) {
+            normalized = false;
+        }
+        return normalized;
+    }
+    
     private void rootAction(TreeNode root) throws TreeActionException {
-        // Conjunctions have to be skipped
-        if (root.getTag().wordClass == 'J') {
+        // Conjunctions and punctuation have to be skipped
+        if (root.getTag().isConjunction() || root.getTag().isPunctuation()) {
             for (TreeNode n: root.getChildren()) {
                 rootAction(n);
             }   
+            return;
+        }        
+        
+        // Trees with verb root are not normalized
+        if (root.getTag().isVerb()) {
+            return;
+        }
+        
+        // If the root is already normalized, we do nothing
+        if (isNormalizedTag(root.getTag())) {
             return;
         }
         
@@ -85,8 +108,8 @@ public class BasicRecursiveNormalizer implements TreeAction {
     }
     
     private void leftChildAction(TreeNode child, TreeNode parent) throws TreeActionException {
-        // Conjunctions have to be skipped
-        if (child.getTag().wordClass == 'J') {
+        // Conjunctions and punctuation have to be skipped
+        if (child.getTag().isConjunction() || child.getTag().isPunctuation()) {
             for (TreeNode n: child.getChildren()) {
                 leftChildAction(n, parent);
             }
@@ -96,8 +119,7 @@ public class BasicRecursiveNormalizer implements TreeAction {
         Tag parentTag = parent.getTag();
         Tag childTag = child.getTag();
         
-        childTag.grCase = parentTag.grCase;
-        childTag.number = parentTag.number;
+        matchTags(parentTag, childTag);
         
         String oldWord = child.getContent();
         String newWord = child.getContent();
@@ -113,6 +135,15 @@ public class BasicRecursiveNormalizer implements TreeAction {
     }
     
     private void rightChildAction(TreeNode child, TreeNode parent) throws TreeActionException {
+        // Conjunctions and punctuation have to be skipped
+        if (child.getTag().isConjunction() || child.getTag().isPunctuation()) {
+            for (TreeNode n: child.getChildren()) {
+                rightChildAction(n, parent);
+            }
+            return;
+        } 
+        
+        
         applyOnChildren(child);
     }
 
@@ -135,4 +166,18 @@ public class BasicRecursiveNormalizer implements TreeAction {
         }
     }
     
+    /**
+     * Matches two tags in matter of gramatical number, case and gender.
+     * @param source Source of the number, case and gender
+     * @param target Tag to be matched
+     */
+    private void matchTags(Tag source, Tag target) {
+        target.grCase = source.grCase;
+        target.number = source.number;
+        
+        // For adjectives, we match the gender as well
+        if (target.isAdjective()) {
+            target.gender = source.gender;
+        }
+    }
 }

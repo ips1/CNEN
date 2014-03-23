@@ -60,6 +60,11 @@ public class MorphoditaGenerator implements MorphologyGenerator {
         
         String[] finalParts = currentString.split("-");
         
+        // String was only the "-"
+        if (finalParts.length < 1) {
+            return currentString;
+        }
+        
         try {
             Integer.parseInt(finalParts[finalParts.length - 1]);
             // Integer parsing was succesful - last part is not part of the raw lemma

@@ -79,4 +79,29 @@ public class Tag {
         return sb.toString();
     }
     
+    public boolean isConjunction() {
+        return wordClass == 'J';
+    }
+    
+    public boolean isVerb() {
+        return wordClass == 'V';
+    }
+    
+    public boolean isAdjective() {
+        return wordClass == 'A';
+    }
+    
+    public boolean isPunctuation() {
+        return wordClass == 'Z';
+    }
+    
+    public boolean isSingular() {
+        return number == 'S';
+    }
+    
+    public boolean isPlural() {
+        return number == 'P';
+    }
+    
+    
 }

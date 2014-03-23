@@ -65,7 +65,7 @@ public class CNEN {
         
         //TreeAction act = new BasicRecursiveNormalizer(true, new MorphoditaGenerator("/home/ips/Bakalarka/morphodita-master/131112/czech-morfflex-131112-raw_lemmas.dict"));
         
-        TreeAction act = new BasicRecursiveNormalizer(true, new MorphoditaGenerator("czech-morfflex-131112.dict"));
+        TreeAction act = new BasicRecursiveNormalizer(truz, new MorphoditaGenerator("czech-morfflex-131112.dict"));
 
         
         try {
