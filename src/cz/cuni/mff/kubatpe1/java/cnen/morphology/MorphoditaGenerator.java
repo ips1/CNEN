@@ -82,4 +82,9 @@ public class MorphoditaGenerator implements MorphologyGenerator {
         return currentString;
     }
     
+    @Override
+    public void finalize() {
+        morphology.delete();
+    }
+    
 }

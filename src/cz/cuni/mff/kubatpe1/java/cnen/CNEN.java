@@ -46,11 +46,12 @@ public class CNEN {
             return;
         }
         
+        TreeAction act = new BasicRecursiveNormalizer(false, new MorphoditaGenerator("czech-morfflex-131112.dict"));
 
-        out.println(normalize(args[0]));
+        out.println(normalize(args[0], act));
     }
     
-    public static String normalize(String inputFile) throws TreeParsingException {
+    public static String normalize(String inputFile, TreeAction normalizer) throws TreeParsingException {
         
         SentenceTreeParser tp = new TreexParser();
         
@@ -73,12 +74,11 @@ public class CNEN {
         
         //TreeAction act = new BasicRecursiveNormalizer(true, new MorphoditaGenerator("/home/ips/Bakalarka/morphodita-master/131112/czech-morfflex-131112-raw_lemmas.dict"));
         
-        TreeAction act = new BasicRecursiveNormalizer(false, new MorphoditaGenerator("czech-morfflex-131112.dict"));
 
         StringBuilder result = new StringBuilder();
         for (SentenceTree tree: treeList) {
             try {
-                act.runOnTree(tree);
+                normalizer.runOnTree(tree);
             } catch (TreeActionException ex) {
                 System.err.println("TreeAction error: " + ex.getMessage());
             }

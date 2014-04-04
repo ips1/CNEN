@@ -172,12 +172,18 @@ public class BasicRecursiveNormalizer implements TreeAction {
      * @param target Tag to be matched
      */
     private void matchTags(Tag source, Tag target) {
-        target.grCase = source.grCase;
-        target.number = source.number;
+        if (source.grCase != 'X' && source.grCase != '-') {
+            target.grCase = source.grCase;
+        }
+        if (source.number != 'X' && source.number != '-') {
+            target.number = source.number;        
+        }
         
         // For adjectives, we match the gender as well
         if (target.isAdjective()) {
-            target.gender = source.gender;
+            if (source.gender != 'X' && source.gender != '-') {
+                target.gender = source.gender;
+            }
         }
     }
 }
