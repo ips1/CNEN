@@ -43,7 +43,7 @@ public class CNENIntegrated {
         String outputFile = args[1];
         try {
             prepareTreexInput(inputFile, tmpFile);
-            runTreex(tmpFile, args[2]);
+            TreexInterface.runTreex(tmpFile, args[2], true);
             generateOutput(inputFile, tmpFile, outputFile);
         } 
         catch (Exception ex) {
@@ -83,36 +83,13 @@ public class CNENIntegrated {
         }
     }
     
-    public static void runTreex(String inputFile, String scenario) throws IOException, InterruptedException {
-        String command = "treex Util::SetGlobal language=cs Read::Text lines_per_doc=1 from=" + inputFile + " " + scenario + " Write::Treex to=. compress=0";
-        System.out.println("Running treex...");
-        Process treexProcess = Runtime.getRuntime().exec(command);
-
-        BufferedReader errReader = new BufferedReader(new InputStreamReader(treexProcess.getErrorStream()));
-        String line;
-        while ((line = errReader.readLine()) != null) {
-            System.err.println(line);
-        }
-        
-        int result = treexProcess.waitFor();
-
-        if (result != 0) {
-            System.err.println("Treex ended with error!");
-            System.exit(1);
-        }
-    }
-    
-    public static String removeSuffix(String source) {
-        return source.substring(0, source.lastIndexOf('.'));
-    }
-    
     public static void generateOutput(String inputFile, String resultBaseName, String outputFile) throws FileNotFoundException, TreeParsingException, UnsupportedEncodingException {
         BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(inputFile), "UTF8"));
         PrintStream out = new PrintStream(new FileOutputStream(outputFile), true, "UTF8");
         
-        String base = removeSuffix(resultBaseName);
+        String base = TreexInterface.removeSuffix(resultBaseName);
         
-        TreeAction act = new BasicRecursiveNormalizer(false, new MorphoditaGenerator("czech-morfflex-131112.dict"));
+        TreeAction act = new BasicRecursiveNormalizer(false, -1, new MorphoditaGenerator("czech-morfflex-131112.dict"));
 
         
         String line;

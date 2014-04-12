@@ -24,6 +24,9 @@ public class TreeNode {
     private String lemma;
     private Tag tag;
     private List<TreeNode> children;
+    
+    private int entityId;
+    private boolean normalized;
 
     public TreeNode(String id, int order, boolean spaceAfter, String content, String lemma, Tag tag) {
         this.id = id;
@@ -34,6 +37,8 @@ public class TreeNode {
         this.tag = tag;
         this.children = new ArrayList<TreeNode>();
         this.childCount = 0;
+        this.entityId = -1;
+        this.normalized = false;
     }
     
     public void addChild(TreeNode child) {
@@ -67,6 +72,30 @@ public class TreeNode {
     
     public void setContent(String content) {
         this.content = content;
+    }
+    
+    public int getEntityId() {
+        return entityId;
+    }
+    
+    public void setEntityId(int entityId) {
+        this.entityId = entityId;
+    }
+    
+    public int countNodes() {
+        int result = 0;
+        for (TreeNode child: children) {
+            result += (child.countNodes() + 1);
+        }
+        return result;
+    }
+    
+    public boolean isNormalized() {
+        return normalized;
+    }
+    
+    public void setNormalized(boolean normalized) {
+        this.normalized = normalized;
     }
     
     @Override

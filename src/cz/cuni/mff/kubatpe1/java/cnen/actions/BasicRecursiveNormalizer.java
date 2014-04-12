@@ -21,10 +21,12 @@ import java.util.logging.Logger;
 public class BasicRecursiveNormalizer implements TreeAction {
 
     private boolean toSingular;
+    private int entityId;
     private MorphologyGenerator mg = null;
     private CaseMatcher caseMatcher;
 
-    public BasicRecursiveNormalizer(boolean toSingular, MorphologyGenerator mg) {
+    public BasicRecursiveNormalizer(boolean toSingular, int entityId, MorphologyGenerator mg) {
+        this.entityId = entityId;
         this.toSingular = toSingular;
         this.mg = mg;
         this.caseMatcher = new CaseMatcher();
@@ -41,9 +43,15 @@ public class BasicRecursiveNormalizer implements TreeAction {
        
         TreeNode root = t.getRoot();
         
+        root.setNormalized(true);
+        
         for (TreeNode n: root.getChildren()) {
             rootAction(n);
         }        
+    }
+    
+    public void normalizeSubtree(TreeNode t) throws TreeActionException {
+        rootAction(t);
     }
     
     /**
@@ -74,6 +82,10 @@ public class BasicRecursiveNormalizer implements TreeAction {
     }
     
     private void rootAction(TreeNode root) throws TreeActionException {
+        if (entityId != -1 && root.getEntityId() != entityId) return;
+        
+        root.setNormalized(true);
+        
         // Conjunctions and punctuation have to be skipped
         if (root.getTag().isConjunction() || root.getTag().isPunctuation()) {
             for (TreeNode n: root.getChildren()) {
@@ -96,11 +108,26 @@ public class BasicRecursiveNormalizer implements TreeAction {
         
         String oldWord = root.getContent();
         String newWord = root.getContent();
+        
+        boolean success = false;
         try {
             newWord = mg.generateForTag(root.getLemma(), root.getTag());
+            success = true;
         } catch (MorphologyGeneratingException ex) {
             System.err.println(ex.getMessage());
         }
+        
+        // If we try to generate for X and fail, we try to swap for S
+        if (!success && root.getTag().number == 'X') {
+            root.getTag().number = 'S';
+            try {
+                newWord = mg.generateForTag(root.getLemma(), root.getTag());
+            }
+            catch (MorphologyGeneratingException ex) {
+                System.err.println(ex.getMessage());
+            }
+        }
+
         
         root.setContent(caseMatcher.matchCase(oldWord, newWord));
         
@@ -108,6 +135,10 @@ public class BasicRecursiveNormalizer implements TreeAction {
     }
     
     private void leftChildAction(TreeNode child, TreeNode parent) throws TreeActionException {
+        if (entityId != -1 && child.getEntityId() != entityId) return;
+        
+        child.setNormalized(true);
+        
         // Conjunctions and punctuation have to be skipped
         if (child.getTag().isConjunction() || child.getTag().isPunctuation()) {
             for (TreeNode n: child.getChildren()) {
@@ -135,6 +166,10 @@ public class BasicRecursiveNormalizer implements TreeAction {
     }
     
     private void rightChildAction(TreeNode child, TreeNode parent) throws TreeActionException {
+        if (entityId != -1 && child.getEntityId() != entityId) return;
+        
+        child.setNormalized(true);
+        
         // Conjunctions and punctuation have to be skipped
         if (child.getTag().isConjunction() || child.getTag().isPunctuation()) {
             for (TreeNode n: child.getChildren()) {
