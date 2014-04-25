@@ -116,6 +116,8 @@ public class CNENSentence {
             normalizer.runOnTree(tree);
         }
         
+        anotatedText.fetchNormalizedNames();
+        
         return anotatedText.generateNormalizedOutput("ne", "normalized_name");
     }
 }

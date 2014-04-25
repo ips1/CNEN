@@ -19,6 +19,7 @@ public class EntityAnotation {
     private final int end;
     private final int id;
     private final String attributes;
+    private String normalizedName;
     private List<TreeNode> entityNodes;
 
     public EntityAnotation(int begin, int end, int id, String attributes) {
@@ -63,7 +64,7 @@ public class EntityAnotation {
         entityNodes.add(i, node);
     }
     
-    public String fetchNormalizedName() {
+    public void fetchNormalizedName() {
         StringBuilder output = new StringBuilder();
         for (int i = 0; i < entityNodes.size(); i++) {
             if (i == entityNodes.size() - 1) {
@@ -74,7 +75,15 @@ public class EntityAnotation {
                 output.append(entityNodes.get(i).toString());
             }
         }
-        return output.toString();
+        normalizedName = output.toString();
+    }
+    
+    public void setNormalizedName(String newName) {
+        normalizedName = newName;
+    }
+    
+    public String getNormalizedName() {
+        return normalizedName;
     }
     
     public String getAttributes() {

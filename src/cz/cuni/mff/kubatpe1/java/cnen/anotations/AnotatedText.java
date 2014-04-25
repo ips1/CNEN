@@ -93,6 +93,16 @@ public class AnotatedText {
         return null;
     }
     
+    public void fetchNormalizedNames() {
+        for (EntityAnotation entity: anotations) {
+            entity.fetchNormalizedName();
+        }
+    }
+    
+    public String getContentForEntityAnotation(int i) {
+        return originalText.substring(anotations.get(i).getBegin(), anotations.get(i).getEnd());
+    }
+    
     public String generateNormalizedOutput(String entityTag, String normalizedNameAttributeName) {
         StringBuilder output = new StringBuilder();
         
@@ -105,7 +115,7 @@ public class AnotatedText {
             output.append("<").append(entityTag);
             output.append(currentAnotation.getAttributes());
             output.append(" ").append(normalizedNameAttributeName).append("=\"");
-            output.append(currentAnotation.fetchNormalizedName()).append("\">");
+            output.append(currentAnotation.getNormalizedName()).append("\">");
             
             output.append(originalText.substring(currentAnotation.getBegin(), currentAnotation.getEnd()));
             
@@ -117,5 +127,9 @@ public class AnotatedText {
         output.append(originalText.substring(lastIndex));
         
         return output.toString();
+    }
+        
+    public List<EntityAnotation> getEntities() {
+        return anotations;
     }
 }
