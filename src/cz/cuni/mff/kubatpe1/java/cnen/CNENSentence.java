@@ -118,6 +118,12 @@ public class CNENSentence {
         
         anotatedText.fetchNormalizedNames();
         
+        // Deleting the temporary treex result file
+        File resFile = new File(resultFile);
+        if (!resFile.delete()) {
+            System.err.println("Temporary file " + tmpFileName + " can't be deleted.");
+        }
+        
         return anotatedText.generateNormalizedOutput("ne", "normalized_name");
     }
 }
