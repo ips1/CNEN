@@ -79,6 +79,27 @@ public class Tag {
         return sb.toString();
     }
     
+    public String toWildcardString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(wordClass == '-' ? '?' : wordClass);
+        sb.append(wordSubClass == '-' ? '?' : wordSubClass);
+        sb.append(gender == '-' ? '?' : gender);
+        sb.append(number == '-' ? '?' : number);
+        sb.append(grCase == '-' ? '?' : grCase);
+        sb.append(possesiveGender == '-' ? '?' : possesiveGender);
+        sb.append(possesiveNumber == '-' ? '?' : possesiveNumber);
+        sb.append(person == '-' ? '?' : person);
+        sb.append(tense == '-' ? '?' : tense);
+        sb.append(degree == '-' ? '?' : degree);
+        sb.append(negation == '-' ? '?' : negation);
+        sb.append(activity == '-' ? '?' : activity);
+        sb.append('?');
+        sb.append('?');
+        sb.append(variant == '-' ? '?' : variant);
+
+        return sb.toString();
+    }
+    
     public boolean isConjunction() {
         return wordClass == 'J';
     }

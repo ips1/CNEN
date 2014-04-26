@@ -29,7 +29,7 @@ public class MorphoditaGenerator implements MorphologyGenerator {
         String cleanLemma = parseLemma(word);
 
         TaggedLemmasForms lemmasForms = new TaggedLemmasForms();
-        String tagString = targetTag.toString();
+        String tagString = targetTag.toWildcardString();
         morphology.generate(cleanLemma, tagString, 1, lemmasForms);
         // TODO - generate error, result empty
         if (lemmasForms.isEmpty()) {

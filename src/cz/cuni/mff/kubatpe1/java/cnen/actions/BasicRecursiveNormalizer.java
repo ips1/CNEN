@@ -95,6 +95,74 @@ public class BasicRecursiveNormalizer implements TreeAction {
         }
     }
     
+    /**
+     * Skips the node n as a conjunction, applies specified action on direct children, solves the rest.
+     * @param n Conjunction node 
+     * @param parent Parent node of conjunction node, if null, conjunction node is root
+     * @param actionType Type of action to perform on nodes connected
+     */
+    private void skipConjunction(TreeNode node, TreeNode parent, RecursiveActionType actionType) throws TreeActionException {
+        TreeNode lastLeft = null;
+        TreeNode firstRight = null;
+        for (TreeNode n: node.getChildren()) {
+            // We look for last left child and first right child
+            if (n.getOrder() < node.getOrder()) {
+                // Left child
+                if (lastLeft == null) {
+                    lastLeft = n;
+                }
+                else {
+                    if (lastLeft.getOrder() < n.getOrder()) {
+                        lastLeft = n;
+                    }
+                }
+            }
+            
+            if (n.getOrder() > node.getOrder()) {
+                // Right child
+                if (firstRight == null) {
+                    firstRight = n;
+                }
+                else {
+                    if (firstRight.getOrder() > n.getOrder()) {
+                        firstRight = n;
+                    }
+                }
+            }
+        }   
+        
+        if (lastLeft != null) {
+            switch (actionType) {
+                case LEFT: leftChildAction(lastLeft, parent); break;
+                case RIGHT: rightChildAction(lastLeft, parent); break;
+                case ROOT: rootAction(lastLeft); break;
+            }       
+        }
+        
+        if (firstRight != null) {
+            switch (actionType) {
+                case LEFT: leftChildAction(firstRight, parent); break;
+                case RIGHT: rightChildAction(firstRight, parent); break;
+                case ROOT: rootAction(firstRight); break;
+            }  
+        }          
+        
+        for (TreeNode n: node.getChildren()) {
+            if (!n.isNormalized()) {
+                if (n.getOrder() < node.getOrder()) {
+                    if (lastLeft != null) {
+                        leftChildAction(n, lastLeft);
+                    }
+                }
+                else {
+                    if (firstRight != null) {
+                        rightChildAction(n, firstRight);                        
+                    }
+                }
+            }
+        }
+    }
+    
     private void rootAction(TreeNode root) throws TreeActionException {
         if (entityId != -1 && root.getEntityId() != entityId) return;
         
@@ -102,9 +170,7 @@ public class BasicRecursiveNormalizer implements TreeAction {
         
         // Conjunctions and punctuation have to be skipped
         if (root.getTag().isConjunction() || root.getTag().isPunctuation()) {
-            for (TreeNode n: root.getChildren()) {
-                rootAction(n);
-            }   
+            skipConjunction(root, null, RecursiveActionType.ROOT);
             return;
         }        
         
@@ -153,10 +219,7 @@ public class BasicRecursiveNormalizer implements TreeAction {
     private void leftChildAction(TreeNode child, TreeNode parent) throws TreeActionException {
         // Conjunctions and punctuation have to be skipped
         if (child.getTag().isConjunction() || child.getTag().isPunctuation()) {
-            child.setNormalized(true);
-            for (TreeNode n: child.getChildren()) {
-                leftChildAction(n, parent);
-            }
+            skipConjunction(child, parent, RecursiveActionType.LEFT);
             return;
         }
         
@@ -186,11 +249,7 @@ public class BasicRecursiveNormalizer implements TreeAction {
     private void rightChildAction(TreeNode child, TreeNode parent) throws TreeActionException {
         // Conjunctions and punctuation have to be skipped
         if (child.getTag().isConjunction() || child.getTag().isPunctuation()) {
-            child.setNormalized(true);
-
-            for (TreeNode n: child.getChildren()) {
-                rightChildAction(n, parent);
-            }
+            skipConjunction(child, parent, RecursiveActionType.RIGHT);
             return;
         }
         
