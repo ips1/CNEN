@@ -69,7 +69,14 @@ public class TreeTextMatcher {
         String pattern = currentNode.getContent();
         for (int i = 0; i < pattern.length(); i++) {
             if (originalText.charAt(currPos + i) != pattern.charAt(i)) {
-                throw new TextMatchingException("Characters " + originalText.charAt(currPos + i) + " and " + pattern.charAt(i) + " don't match!");
+                // Still have to check whether whitespaces inside token weren't eliminated
+                int skippedPos = skipWhiteSpace(originalText, currPos + i);
+                if (originalText.charAt(skippedPos) != pattern.charAt(i)) {
+                    throw new TextMatchingException("Characters " + originalText.charAt(currPos + i) + " and " + pattern.charAt(i) + " don't match!");
+                }
+                else {
+                    currPos = skippedPos - i;
+                }
             }
         }
         int finalPos = skipWhiteSpace(originalText, currPos + pattern.length());

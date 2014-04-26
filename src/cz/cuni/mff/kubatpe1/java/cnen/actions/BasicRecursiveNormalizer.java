@@ -81,6 +81,20 @@ public class BasicRecursiveNormalizer implements TreeAction {
         return normalized;
     }
     
+    /**
+     * Marks whole subtree of a specified node (including it) as normalized
+     * @param node Node whose subtree is to be marked
+     */
+    private void markSubtreeAsNormalized(TreeNode node) {
+        if (entityId != -1 && node.getEntityId() != entityId) return;
+        
+        node.setNormalized(true);
+        
+        for (TreeNode child: node.getChildren()) {
+            markSubtreeAsNormalized(child);
+        }
+    }
+    
     private void rootAction(TreeNode root) throws TreeActionException {
         if (entityId != -1 && root.getEntityId() != entityId) return;
         
@@ -101,6 +115,8 @@ public class BasicRecursiveNormalizer implements TreeAction {
         
         // If the root is already normalized, we do nothing
         if (isNormalizedTag(root.getTag())) {
+            // We have to mark all descendants as normalized
+            markSubtreeAsNormalized(root);
             return;
         }
         
@@ -135,17 +151,19 @@ public class BasicRecursiveNormalizer implements TreeAction {
     }
     
     private void leftChildAction(TreeNode child, TreeNode parent) throws TreeActionException {
-        if (entityId != -1 && child.getEntityId() != entityId) return;
-        
-        child.setNormalized(true);
-        
         // Conjunctions and punctuation have to be skipped
         if (child.getTag().isConjunction() || child.getTag().isPunctuation()) {
+            child.setNormalized(true);
             for (TreeNode n: child.getChildren()) {
                 leftChildAction(n, parent);
             }
             return;
         }
+        
+        // We got out of the entity, stoping normalization
+        if (entityId != -1 && child.getEntityId() != entityId) return;
+        
+        child.setNormalized(true);
         
         Tag parentTag = parent.getTag();
         Tag childTag = child.getTag();
@@ -166,7 +184,24 @@ public class BasicRecursiveNormalizer implements TreeAction {
     }
     
     private void rightChildAction(TreeNode child, TreeNode parent) throws TreeActionException {
+        // Conjunctions and punctuation have to be skipped
+        if (child.getTag().isConjunction() || child.getTag().isPunctuation()) {
+            child.setNormalized(true);
+
+            for (TreeNode n: child.getChildren()) {
+                rightChildAction(n, parent);
+            }
+            return;
+        }
+        
+        // We got out of the entity, stoping normalization
         if (entityId != -1 && child.getEntityId() != entityId) return;
+        
+        // Verbs derived from present transgressive form of a verb have to be treated differently
+        if (child.getTag().isAdjective() && child.getTag().wordSubClass == 'G') {
+            leftChildAction(child, parent);
+            return;
+        }
         
         child.setNormalized(true);
         
