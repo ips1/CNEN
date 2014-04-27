@@ -180,7 +180,9 @@ public class BasicRecursiveNormalizer implements TreeAction {
         }
         
         // If the root is already normalized, we do nothing
-        if (isNormalizedTag(root.getTag())) {
+        // The same goes for the verbs in root
+        // And for prepositions in root
+        if (isNormalizedTag(root.getTag()) || root.getTag().isVerb() || root.getTag().isPreposition()) {
             // We have to mark all descendants as normalized
             markSubtreeAsNormalized(root);
             return;

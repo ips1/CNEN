@@ -116,6 +116,10 @@ public class Tag {
         return wordClass == 'Z';
     }
     
+    public boolean isPreposition() {
+        return wordClass == 'R';
+    }
+    
     public boolean isSingular() {
         return number == 'S';
     }

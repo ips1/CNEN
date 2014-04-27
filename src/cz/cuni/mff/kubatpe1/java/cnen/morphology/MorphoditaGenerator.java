@@ -29,11 +29,18 @@ public class MorphoditaGenerator implements MorphologyGenerator {
         String cleanLemma = parseLemma(word);
 
         TaggedLemmasForms lemmasForms = new TaggedLemmasForms();
-        String tagString = targetTag.toWildcardString();
+        String tagString = targetTag.toString();
         morphology.generate(cleanLemma, tagString, 1, lemmasForms);
-        // TODO - generate error, result empty
+        
         if (lemmasForms.isEmpty()) {
-            throw new MorphologyGeneratingException("Can't generate " + tagString + " for " + cleanLemma);
+            // Can't generate exact form, we try to use wildcard
+            tagString = targetTag.toWildcardString();
+            lemmasForms = new TaggedLemmasForms();
+            morphology.generate(cleanLemma, tagString, 1, lemmasForms);
+            if (lemmasForms.isEmpty()) {
+                // Can't generate even for wildcard - throwing exception
+                throw new MorphologyGeneratingException("Can't generate " + tagString + " for " + cleanLemma);
+            }
         }
         TaggedForms taggedForms = lemmasForms.get(0).getForms();
         if (lemmasForms.isEmpty()) {
