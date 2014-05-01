@@ -45,7 +45,7 @@ public class TreexParser implements SentenceTreeParser {
     private static final String DEF_TAG = "---------------";
     
     @Override
-    public List<SentenceTree> parseTree(String path) throws TreeParsingException {
+    public SentenceCollection parseDocument(String path) throws TreeParsingException {
         Document doc = loadDOM(path);
         return parseDOM(doc);
     }
@@ -78,11 +78,11 @@ public class TreexParser implements SentenceTreeParser {
      * @return Parsed sentence tree
      * @throws TreeParsingException Document can't be parsed
      */
-    private List<SentenceTree> parseDOM(Document doc) throws TreeParsingException {
+    private SentenceCollection parseDOM(Document doc) throws TreeParsingException {
         // Searching for a root element
         NodeList rootList = doc.getElementsByTagName(TREE_ROOT);
         
-        ArrayList<SentenceTree> treeList = new ArrayList<SentenceTree>();
+        SentenceCollection collection = new SentenceCollection();
         
         for (int i = 0; i < rootList.getLength(); i++) {
             Element root = (Element)rootList.item(i);
@@ -92,10 +92,10 @@ public class TreexParser implements SentenceTreeParser {
 
             SentenceTree tree = new SentenceTree(rootNode);
             
-            treeList.add(tree);
+            collection.addTree(tree);
         }
         
-        return treeList;
+        return collection;
     }
     
     /**

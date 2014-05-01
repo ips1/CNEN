@@ -15,17 +15,25 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
- * @author Petr
+ * TreeAction implementation of a normalization procedure.
+ * This class implements a rule procedure described in a bachelor thesis "Normalization of named entities in czech texts" by Petr Kubat"
+ * 
+ * @author Petr Kubat
  */
-public class BasicRecursiveNormalizer implements TreeAction {
+public class SingleEntityNormalizer implements TreeAction {
 
     private boolean toSingular;
     private int entityId;
     private MorphologyGenerator mg = null;
     private CaseMatcher caseMatcher;
-
-    public BasicRecursiveNormalizer(boolean toSingular, int entityId, MorphologyGenerator mg) {
+    
+    /**
+     * Default constructor.
+     * @param toSingular Boolean specifying whether the named entities should be turned to singular
+     * @param entityId Identifier of an entity to be normalized (tree can contain more entities), -1 is a default value for nodes
+     * @param mg Generator to be used for morphology generation
+     */
+    public SingleEntityNormalizer(boolean toSingular, int entityId, MorphologyGenerator mg) {
         this.entityId = entityId;
         this.toSingular = toSingular;
         this.mg = mg;
@@ -35,7 +43,7 @@ public class BasicRecursiveNormalizer implements TreeAction {
     
     
     /**
-     * Performs basic recursive normalization on a tree
+     * Performs the normalization algorithm on a tree
      * @param t Tree to be modified
      */
     @Override
@@ -50,6 +58,11 @@ public class BasicRecursiveNormalizer implements TreeAction {
         }        
     }
     
+    /**
+     * Performs the normalization beginning in a subtree
+     * @param t Root of a subtree to be modified
+     * @throws TreeActionException 
+     */
     public void normalizeSubtree(TreeNode t) throws TreeActionException {
         rootAction(t);
     }
@@ -163,6 +176,11 @@ public class BasicRecursiveNormalizer implements TreeAction {
         }
     }
     
+    /**
+     * Perorms recursive step for a root node.
+     * @param root Root node
+     * @throws TreeActionException  
+     */
     private void rootAction(TreeNode root) throws TreeActionException {
         if (entityId != -1 && root.getEntityId() != entityId) return;
         
@@ -258,8 +276,8 @@ public class BasicRecursiveNormalizer implements TreeAction {
         // We got out of the entity, stoping normalization
         if (entityId != -1 && child.getEntityId() != entityId) return;
         
-        // Verbs derived from present transgressive form of a verb have to be treated differently
-        if (child.getTag().isAdjective() && child.getTag().wordSubClass == 'G') {
+        // Adjectives standing on the right side of noun have to be treated as if they were on the left
+        if (child.getTag().isAdjective() && parent.getTag().isNoun()) {
             leftChildAction(child, parent);
             return;
         }

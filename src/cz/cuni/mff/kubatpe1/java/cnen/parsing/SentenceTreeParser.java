@@ -18,6 +18,5 @@ import java.util.List;
  * @author Petr
  */
 public interface SentenceTreeParser {
-    List<SentenceTree> parseTree(String path) throws TreeParsingException;
-    //SentenceTree parseTree(InputStream is) throws TreeParsingException;
+    SentenceCollection parseDocument(String path) throws TreeParsingException;
 }

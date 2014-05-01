@@ -8,8 +8,8 @@ package cz.cuni.mff.kubatpe1.java.cnen.sentencetree;
 
 import cz.cuni.mff.kubatpe1.java.cnen.anotations.AnotatedText;
 import cz.cuni.mff.kubatpe1.java.cnen.anotations.EntityAnotation;
+import cz.cuni.mff.kubatpe1.java.cnen.parsing.SentenceCollection;
 import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.exceptions.TextMatchingException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,29 +18,29 @@ import java.util.List;
  */
 public class TreeTextMatcher {
 
-    private List<SentenceTree> treeSet;
+    private SentenceCollection treeSet;
     
-    public TreeTextMatcher(List<SentenceTree> treeSet) {
+    public TreeTextMatcher(SentenceCollection treeSet) {
         this.treeSet = treeSet;
     }
     
     public TreeTextMatcher() {
-        treeSet = new ArrayList<SentenceTree>();
+        treeSet = new SentenceCollection();
     }
     
     public void clearTreeSet() {
-        treeSet.clear();
+        treeSet = new SentenceCollection();
     }
     
     public void addTree (SentenceTree tree) {
-        treeSet.add(tree);
+        treeSet.addTree(tree);
     }
     
     public void matchWithText(AnotatedText text) throws TextMatchingException {
         // Assuming there is unlimited white space between tokens
         
         int currentPosition = 0;
-        for (SentenceTree currentTree: treeSet) {
+        for (SentenceTree currentTree: treeSet.getTrees()) {
             List<TreeNode> linearTree = currentTree.getLinearRepresentation();
             
             for (TreeNode currentNode: linearTree) {

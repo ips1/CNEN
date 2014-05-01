@@ -120,6 +120,10 @@ public class Tag {
         return wordClass == 'R';
     }
     
+    public boolean isNoun() {
+        return wordClass == 'N';
+    }
+    
     public boolean isSingular() {
         return number == 'S';
     }

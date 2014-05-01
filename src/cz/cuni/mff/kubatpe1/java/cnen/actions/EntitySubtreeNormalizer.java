@@ -38,7 +38,7 @@ public class EntitySubtreeNormalizer implements TreeAction {
             TreeNode currentNode = stack.pop();
             int entityId = currentNode.getEntityId();
             if (entityId != -1 && !currentNode.isNormalized()) {
-                BasicRecursiveNormalizer normalizer = new BasicRecursiveNormalizer(toSingular, entityId, mg);
+                SingleEntityNormalizer normalizer = new SingleEntityNormalizer(toSingular, entityId, mg);
                 normalizer.normalizeSubtree(currentNode);
             }
             for (TreeNode childNode: currentNode.getChildren()) {
