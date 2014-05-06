@@ -32,7 +32,8 @@ public class TreexInterface {
     public static List<String> runTreex(String inputFile, String scenario, boolean oneDocPerLine) throws TreexException {
         String docPerLine = oneDocPerLine ? "lines_per_doc=1 " : "";
         String command = "treex Util::SetGlobal language=cs Read::Text " + docPerLine + "from=" + inputFile + " " + scenario + " Write::Treex to=. compress=0";
-        System.out.println("Running treex...");
+
+        System.err.println("Running treex...");
         
         int result = 1;
         String line;
@@ -42,7 +43,9 @@ public class TreexInterface {
         
         try {
             Process treexProcess = Runtime.getRuntime().exec(command);
-
+            System.err.println("Treex started...");
+        
+            
             BufferedReader errReader = new BufferedReader(new InputStreamReader(treexProcess.getErrorStream()));
             
             while ((line = errReader.readLine()) != null) {

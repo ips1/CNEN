@@ -51,11 +51,13 @@ public class SingleEntityNormalizer implements TreeAction {
        
         TreeNode root = t.getRoot();
         
-        root.setNormalized(true);
-        
-        for (TreeNode n: root.getChildren()) {
-            rootAction(n);
-        }        
+        if (root != null) {
+            root.setNormalizedInEntity(entityId, true);
+
+            for (TreeNode n: root.getChildren()) {
+                rootAction(n);
+            }        
+        }      
     }
     
     /**
@@ -99,9 +101,9 @@ public class SingleEntityNormalizer implements TreeAction {
      * @param node Node whose subtree is to be marked
      */
     private void markSubtreeAsNormalized(TreeNode node) {
-        if (entityId != -1 && node.getEntityId() != entityId) return;
+        if (entityId != -1 && !node.isInEntity(entityId)) return;
         
-        node.setNormalized(true);
+        node.setNormalizedInEntity(entityId, true);
         
         for (TreeNode child: node.getChildren()) {
             markSubtreeAsNormalized(child);
@@ -161,7 +163,7 @@ public class SingleEntityNormalizer implements TreeAction {
         }          
         
         for (TreeNode n: node.getChildren()) {
-            if (!n.isNormalized()) {
+            if (!n.isNormalizedInEntity(entityId)) {
                 if (n.getOrder() < node.getOrder()) {
                     if (lastLeft != null) {
                         leftChildAction(n, lastLeft);
@@ -177,53 +179,48 @@ public class SingleEntityNormalizer implements TreeAction {
     }
     
     /**
-     * Perorms recursive step for a root node.
+     * Performs recursive step for a root node.
      * @param root Root node
      * @throws TreeActionException  
      */
     private void rootAction(TreeNode root) throws TreeActionException {
-        if (entityId != -1 && root.getEntityId() != entityId) return;
+        if (entityId != -1 && !root.isInEntity(entityId)) return;
         
-        root.setNormalized(true);
+        root.setNormalizedInEntity(entityId, true);
         
         // Conjunctions and punctuation have to be skipped
-        if (root.getTag().isConjunction() || root.getTag().isPunctuation()) {
+        if (root.getTagInEntity(entityId).isConjunction() || root.getTagInEntity(entityId).isPunctuation()) {
             skipConjunction(root, null, RecursiveActionType.ROOT);
             return;
         }        
-        
-        // Trees with verb root are not normalized
-        if (root.getTag().isVerb()) {
-            return;
-        }
-        
+                
         // If the root is already normalized, we do nothing
         // The same goes for the verbs in root
         // And for prepositions in root
-        if (isNormalizedTag(root.getTag()) || root.getTag().isVerb() || root.getTag().isPreposition()) {
+        if (isNormalizedTag(root.getTagInEntity(entityId)) || root.getTagInEntity(entityId).isVerb() || root.getTagInEntity(entityId).isPreposition()) {
             // We have to mark all descendants as normalized
             markSubtreeAsNormalized(root);
             return;
         }
         
-        normalizeTag(root.getTag());
+        normalizeTag(root.getTagInEntity(entityId));
         
-        String oldWord = root.getContent();
-        String newWord = root.getContent();
+        String oldWord = root.getContentInEntity(entityId);
+        String newWord = root.getContentInEntity(entityId);
         
         boolean success = false;
         try {
-            newWord = mg.generateForTag(root.getLemma(), root.getTag());
+            newWord = mg.generateForTag(root.getLemmaInEntity(entityId), root.getTagInEntity(entityId));
             success = true;
         } catch (MorphologyGeneratingException ex) {
             System.err.println(ex.getMessage());
         }
         
         // If we try to generate for X and fail, we try to swap for S
-        if (!success && root.getTag().number == 'X') {
-            root.getTag().number = 'S';
+        if (!success && root.getTagInEntity(entityId).number == 'X') {
+            root.getTagInEntity(entityId).number = 'S';
             try {
-                newWord = mg.generateForTag(root.getLemma(), root.getTag());
+                newWord = mg.generateForTag(root.getLemmaInEntity(entityId), root.getTagInEntity(entityId));
             }
             catch (MorphologyGeneratingException ex) {
                 System.err.println(ex.getMessage());
@@ -231,61 +228,61 @@ public class SingleEntityNormalizer implements TreeAction {
         }
 
         
-        root.setContent(caseMatcher.matchCase(oldWord, newWord));
+        root.setContentInEntity(entityId, caseMatcher.matchCase(oldWord, newWord));
         
         applyOnChildren(root);
     }
     
     private void leftChildAction(TreeNode child, TreeNode parent) throws TreeActionException {
         // Conjunctions and punctuation have to be skipped
-        if (child.getTag().isConjunction() || child.getTag().isPunctuation()) {
+        if (child.getTagInEntity(entityId).isConjunction() || child.getTagInEntity(entityId).isPunctuation()) {
             skipConjunction(child, parent, RecursiveActionType.LEFT);
             return;
         }
         
         // We got out of the entity, stoping normalization
-        if (entityId != -1 && child.getEntityId() != entityId) return;
+        if (entityId != -1 && !child.isInEntity(entityId)) return;
         
-        child.setNormalized(true);
+        child.setNormalizedInEntity(entityId, true);
         
-        Tag parentTag = parent.getTag();
-        Tag childTag = child.getTag();
+        Tag parentTag = parent.getTagInEntity(entityId);
+        Tag childTag = child.getTagInEntity(entityId);
         
         matchTags(parentTag, childTag);
         
-        String oldWord = child.getContent();
-        String newWord = child.getContent();
+        String oldWord = child.getContentInEntity(entityId);
+        String newWord = child.getContentInEntity(entityId);
         try {
-            newWord = mg.generateForTag(child.getLemma(), childTag);
+            newWord = mg.generateForTag(child.getLemmaInEntity(entityId), childTag);
         } catch (MorphologyGeneratingException ex) {
             System.err.println(ex.getMessage());
         }
         
-        child.setContent(caseMatcher.matchCase(oldWord, newWord));
+        child.setContentInEntity(entityId, caseMatcher.matchCase(oldWord, newWord));
         
         applyOnChildren(child);
     }
     
     private void rightChildAction(TreeNode child, TreeNode parent) throws TreeActionException {
         // Conjunctions and punctuation have to be skipped
-        if (child.getTag().isConjunction() || child.getTag().isPunctuation()) {
+        if (child.getTagInEntity(entityId).isConjunction() || child.getTagInEntity(entityId).isPunctuation()) {
             skipConjunction(child, parent, RecursiveActionType.RIGHT);
             return;
         }
         
         // We got out of the entity, stoping normalization
-        if (entityId != -1 && child.getEntityId() != entityId) return;
+        if (entityId != -1 && !child.isInEntity(entityId)) return;
         
         // Adjectives standing on the right side of noun have to be treated as if they were on the left
-        if (child.getTag().isAdjective() && parent.getTag().isNoun()) {
+        if (child.getTagInEntity(entityId).isAdjective() && parent.getTagInEntity(entityId).isNoun()) {
             leftChildAction(child, parent);
             return;
         }
         
-        child.setNormalized(true);
+        child.setNormalizedInEntity(entityId, true);
         
         // Conjunctions and punctuation have to be skipped
-        if (child.getTag().isConjunction() || child.getTag().isPunctuation()) {
+        if (child.getTagInEntity(entityId).isConjunction() || child.getTagInEntity(entityId).isPunctuation()) {
             for (TreeNode n: child.getChildren()) {
                 rightChildAction(n, parent);
             }
@@ -316,7 +313,7 @@ public class SingleEntityNormalizer implements TreeAction {
     }
     
     /**
-     * Matches two tags in matter of gramatical number, case and gender.
+     * Matches two tags in matter of grammatical number, case and gender.
      * @param source Source of the number, case and gender
      * @param target Tag to be matched
      */

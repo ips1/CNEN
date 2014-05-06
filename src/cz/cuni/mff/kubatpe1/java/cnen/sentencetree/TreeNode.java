@@ -14,31 +14,34 @@ import java.util.*;
  * @author Petr Kubat
  */
 public class TreeNode {
+    private static final int defaultFormId = -1;
     
     private int childCount;
     
-    private String id;
-    private int order;
-    private boolean spaceAfter;
-    private String content;
-    private String lemma;
-    private Tag tag;
-    private List<TreeNode> children;
-    
-    private int entityId;
-    private boolean normalized;
+    // Identifier of the node
+    private final String id;
+    private final int order;
+    private final boolean spaceAfter;
+    private final AnalyticalFunction afun;
+    // Form for the original word
+    private final WordForm originalForm;
+    // Default form for the word, might be changed
+    private final WordForm defaultForm;
+    // Forms for all entities which the word is part of
+    private final Map<Integer, WordForm> entityForms;
+    private final List<TreeNode> children;
 
-    public TreeNode(String id, int order, boolean spaceAfter, String content, String lemma, Tag tag) {
+    public TreeNode(String id, int order, boolean spaceAfter, String content, String lemma, Tag tag, AnalyticalFunction afun) {
         this.id = id;
         this.order = order;
         this.spaceAfter = spaceAfter;
-        this.content = content;
-        this.lemma = lemma;
-        this.tag = tag;
+        this.afun = afun;
+        this.originalForm = new WordForm(content, lemma, tag);
+        this.defaultForm = originalForm.getCopy();
         this.children = new ArrayList<TreeNode>();
         this.childCount = 0;
-        this.entityId = -1;
-        this.normalized = false;
+        
+        this.entityForms = new HashMap<Integer, WordForm>();
     }
     
     public void addChild(TreeNode child) {
@@ -58,28 +61,65 @@ public class TreeNode {
         return order;
     }
     
-    public Tag getTag() {
-        return tag;
+    public Tag getDefaultFormTag() {
+        return defaultForm.tag;
     }
     
-    public String getLemma() {
-        return lemma;
+    public String getDefaultFormLemma() {
+        return defaultForm.lemma;
     }
     
-    public String getContent() {
-        return content;
+    public Tag getTagInEntity(int entityId) {
+        if (entityId == defaultFormId) {
+            return defaultForm.tag;
+        }
+        if (!this.isInEntity(entityId)) {
+            return defaultForm.tag;
+        }
+        return entityForms.get(entityId).tag;
     }
     
-    public void setContent(String content) {
-        this.content = content;
+    public String getLemmaInEntity(int entityId) {
+        if (entityId == defaultFormId) {
+            return defaultForm.lemma;
+        }
+        if (!this.isInEntity(entityId)) {
+            return defaultForm.lemma;
+        }
+        return entityForms.get(entityId).lemma;
     }
     
-    public int getEntityId() {
-        return entityId;
+    public String getContentInEntity(int entityId) {
+        if (entityId == defaultFormId) {
+            return defaultForm.content;
+        }
+        if (!this.isInEntity(entityId)) {
+            return defaultForm.lemma;
+        }
+        return entityForms.get(entityId).content;
     }
     
-    public void setEntityId(int entityId) {
-        this.entityId = entityId;
+    public void setContentInEntity(int entityId, String content) {
+        if (entityId == defaultFormId) {
+            defaultForm.content = content;
+            return;
+        }
+        entityForms.get(entityId).content = content;    
+    }
+    
+    public boolean isInEntity(int entityId) {
+        if (entityId == defaultFormId) return true;
+        return entityForms.containsKey(entityId);
+    }
+    
+    public void addToEntity(int entityId) {
+        if (entityId == defaultFormId) return;
+        if (entityForms.containsKey(entityId)) return;
+        entityForms.put(entityId, defaultForm.getCopy());
+    }
+    
+    public List<Integer> getEntityIds() {
+        return new ArrayList(entityForms.keySet());
     }
     
     public int countNodes() {
@@ -90,22 +130,36 @@ public class TreeNode {
         return result;
     }
     
-    public boolean isNormalized() {
-        return normalized;
+    public boolean isNormalizedInEntity(int entityId) {
+        if (entityId == defaultFormId) {
+            return defaultForm.normalized;
+        }
+        return entityForms.get(entityId).normalized;
     }
     
-    public void setNormalized(boolean normalized) {
-        this.normalized = normalized;
+    public void setNormalizedInEntity(int entityId, boolean normalized) {
+        if (entityId == defaultFormId) {
+            defaultForm.normalized = normalized;
+            return;
+        }
+        entityForms.get(entityId).normalized = normalized;
+    }
+    
+    public String stringFromEntity(int entityId) {
+        String str = null;
+        if (entityId == defaultFormId) {
+            str = defaultForm.content;
+        }
+        else {
+            str = entityForms.get(entityId).content;
+        }
+        
+        return (spaceAfter ? str + ' ' : str);
     }
     
     @Override
     public String toString() {
-        if (spaceAfter) {
-            return content + ' ';
-        }
-        else {
-            return content;
-        }
+        return stringFromEntity(defaultFormId);
     }
     
 }

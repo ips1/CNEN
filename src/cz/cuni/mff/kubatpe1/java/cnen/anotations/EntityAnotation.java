@@ -9,6 +9,7 @@ package cz.cuni.mff.kubatpe1.java.cnen.anotations;
 import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.TreeNode;
 import java.util.ArrayList;
 import java.util.List;
+import org.w3c.dom.Element;
 
 /**
  *
@@ -18,15 +19,15 @@ public class EntityAnotation {
     private final int begin;
     private final int end;
     private final int id;
-    private final String attributes;
+    private final Element anotationElement;
     private String normalizedName;
     private List<TreeNode> entityNodes;
 
-    public EntityAnotation(int begin, int end, int id, String attributes) {
+    public EntityAnotation(int begin, int end, int id, Element anotationElement) {
         this.begin = begin;
         this.end = end;
         this.id = id;
-        this.attributes = attributes;
+        this.anotationElement = anotationElement;
         this.entityNodes = new ArrayList<TreeNode>();
     }
     
@@ -48,7 +49,7 @@ public class EntityAnotation {
     
     public void assignNode(TreeNode node) {
         // Only assigning nodes with corresponding ID
-        if (node.getEntityId() != id) return;
+        if (!node.isInEntity(id)) return;
         
         int i = 0;
         
@@ -69,13 +70,15 @@ public class EntityAnotation {
         for (int i = 0; i < entityNodes.size(); i++) {
             if (i == entityNodes.size() - 1) {
                 // Last one printed without space
-                output.append(entityNodes.get(i).getContent());
+                output.append(entityNodes.get(i).getContentInEntity(id));
             }
             else {
-                output.append(entityNodes.get(i).toString());
+                output.append(entityNodes.get(i).stringFromEntity(id));
             }
         }
         normalizedName = output.toString();
+        
+        System.err.println("Entity " + id + ": " + normalizedName);
     }
     
     public void setNormalizedName(String newName) {
@@ -86,7 +89,7 @@ public class EntityAnotation {
         return normalizedName;
     }
     
-    public String getAttributes() {
-        return attributes;
+    public Element getAnotationElement() {
+        return anotationElement;
     }
 }

@@ -6,28 +6,41 @@
 
 package cz.cuni.mff.kubatpe1.java.cnen.anotations;
 
+import cz.cuni.mff.kubatpe1.java.cnen.dom.DOMException;
+import cz.cuni.mff.kubatpe1.java.cnen.dom.DOMLoader;
+import cz.cuni.mff.kubatpe1.java.cnen.parsing.exceptions.TreeParsingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  *
  * @author petrkubat
  */
 public class AnotatedText {
-    private String originalText;
-    private List<EntityAnotation> anotations;
+    private final Document DOMDocument;
+    private final String originalText;
+    private final List<EntityAnotation> anotations;
     
-    private AnotatedText(String originalText, List<EntityAnotation> anotations) {
+    public AnotatedText(Document DOMDocument, String originalText, List<EntityAnotation> anotations) {
+        this.DOMDocument = DOMDocument;
         this.originalText = originalText;
         this.anotations = anotations;
     }
     
+    
+    /*
     public static AnotatedText parseText(String text, String entityTag) throws AnotationParsingException {
         List<EntityAnotation> anotations = new ArrayList<EntityAnotation>();
         StringBuilder originalText = new StringBuilder();
         
-        String startSeq = "<" + entityTag;
-        String endSeq = "</" + entityTag + ">";
+        String startSeq = entityTag;
+        String endSeq = "/" + entityTag + ">";
         
         int currentId = 0;
         
@@ -36,7 +49,7 @@ public class AnotatedText {
 	int relPosition = 0;
         
         while ((i = text.indexOf(startSeq, start)) != -1) {
-            // Starting tag sequence has been matched
+            // Starting or ending tag has been matched
             int tagEndPos = text.indexOf(">", i + startSeq.length());
             if (tagEndPos == -1) {
                 throw new AnotationParsingException("Tag not ended!");
@@ -69,33 +82,40 @@ public class AnotatedText {
         
         return result;
     }
+    */
     
     public String getText() {
         return originalText;
     }
     
-    // Returns -1 if there is no entity
-    public int getEntityIdAtPosition(int position) {
+    // Returns empty list
+    public List<Integer> getEntityIdsAtPosition(int position) {
+        List<Integer> result = new ArrayList<Integer>();
         for (EntityAnotation anotation: anotations) {
             if (position >= anotation.getBegin() && position < anotation.getEnd()) {
-                return anotation.getId();
+                result.add(anotation.getId());
             }
         }
-        return -1;
+        return result;
     }
 
-    public EntityAnotation getEntityAtPosition(int position) {
+    public List<EntityAnotation> getEntitiesAtPosition(int position) {
+        List<EntityAnotation> result = new ArrayList<EntityAnotation>();
         for (EntityAnotation anotation: anotations) {
             if (position >= anotation.getBegin() && position < anotation.getEnd()) {
-                return anotation;
+                result.add(anotation);
             }
         }
-        return null;
+        return result;
     }
     
-    public void fetchNormalizedNames() {
+    public void fetchNormalizedNames(String normalizedNameAttributeName) {
         for (EntityAnotation entity: anotations) {
             entity.fetchNormalizedName();
+                        
+            Element anotationElement = entity.getAnotationElement();
+            
+            anotationElement.setAttribute(normalizedNameAttributeName, entity.getNormalizedName());
         }
     }
     
@@ -103,30 +123,8 @@ public class AnotatedText {
         return originalText.substring(anotations.get(i).getBegin(), anotations.get(i).getEnd());
     }
     
-    public String generateNormalizedOutput(String entityTag, String normalizedNameAttributeName) {
-        StringBuilder output = new StringBuilder();
-        
-        int lastIndex = 0;
-        for (int i = 0; i < anotations.size(); i++) {
-            EntityAnotation currentAnotation = anotations.get(i);
-            
-            output.append(originalText.substring(lastIndex, currentAnotation.getBegin()));
-            
-            output.append("<").append(entityTag);
-            output.append(currentAnotation.getAttributes());
-            output.append(" ").append(normalizedNameAttributeName).append("=\"");
-            output.append(currentAnotation.getNormalizedName()).append("\">");
-            
-            output.append(originalText.substring(currentAnotation.getBegin(), currentAnotation.getEnd()));
-            
-            output.append("</").append(entityTag).append(">");
-            
-            lastIndex = currentAnotation.getEnd();
-        }
-        
-        output.append(originalText.substring(lastIndex));
-        
-        return output.toString();
+    public void generateNormalizedOutput(String output) throws DOMException {
+        DOMLoader.saveDOM(output, DOMDocument);
     }
         
     public List<EntityAnotation> getEntities() {

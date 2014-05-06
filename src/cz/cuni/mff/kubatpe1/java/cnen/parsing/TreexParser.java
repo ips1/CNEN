@@ -6,15 +6,15 @@
 
 package cz.cuni.mff.kubatpe1.java.cnen.parsing;
 
+import cz.cuni.mff.kubatpe1.java.cnen.dom.DOMException;
+import cz.cuni.mff.kubatpe1.java.cnen.dom.DOMLoader;
 import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.SentenceTree;
 import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.Tag;
 import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.TreeNode;
 import cz.cuni.mff.kubatpe1.java.cnen.parsing.exceptions.TreeParsingException;
+import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.AnalyticalFunction;
 import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.exceptions.InvalidTagException;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
@@ -22,7 +22,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -41,34 +40,18 @@ public class TreexParser implements SentenceTreeParser {
     private static final String TAG_ELEM = "tag";
     private static final String ORD_ELEM = "ord";
     private static final String NO_SPACE_ELEM = "no_space_after";
+    private static final String AFUN_ELEM = "afun";
     
     private static final String DEF_TAG = "---------------";
     
     @Override
     public SentenceCollection parseDocument(String path) throws TreeParsingException {
-        Document doc = loadDOM(path);
-        return parseDOM(doc);
-    }
-    
-    private Document loadDOM(String path) throws TreeParsingException {
-        Document doc;
         try {
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            dbf.setValidating(false);
-
-            DocumentBuilder builder = dbf.newDocumentBuilder();
-
-            doc = builder.parse(path);
-        }
-        catch (SAXException ex) {
-            throw new TreeParsingException(ex);
-        } catch (IOException ex) {
-            throw new TreeParsingException(ex);
-        } catch (ParserConfigurationException ex) {
+            Document doc = DOMLoader.loadDOM(path);
+            return parseDOM(doc);
+        } catch (DOMException ex) {
             throw new TreeParsingException(ex);
         }
-        
-        return doc;
     }
     
     /**
@@ -115,6 +98,7 @@ public class TreexParser implements SentenceTreeParser {
         String content = "";
         String lemma = "";
         String tagString = DEF_TAG;
+        String afunString = "";
         
         Element childrenElement = null;
         
@@ -135,7 +119,7 @@ public class TreexParser implements SentenceTreeParser {
                 }   
                 childrenElement = (Element)current;
             }
-            else if(elemName.equals(ORD_ELEM)) {
+            else if (elemName.equals(ORD_ELEM)) {
                 try {
                     order = Integer.parseInt(getNodeContent(current));
                 }
@@ -143,16 +127,19 @@ public class TreexParser implements SentenceTreeParser {
                     throw new TreeParsingException(ex);
                 }   
             }
-            else if(elemName.equals(FORM_ELEM)) {
+            else if (elemName.equals(FORM_ELEM)) {
                 content = getNodeContent(current);
             }
-            else if(elemName.equals(LEMMA_ELEM)) {
+            else if (elemName.equals(LEMMA_ELEM)) {
                 lemma = getNodeContent(current);
             }
-            else if(elemName.equals(TAG_ELEM)) {
+            else if (elemName.equals(TAG_ELEM)) {
                 tagString = getNodeContent(current);
             }
-            else if(elemName.equals(NO_SPACE_ELEM)) {
+            else if (elemName.equals(AFUN_ELEM)) {
+                afunString = getNodeContent(current);
+            }
+            else if (elemName.equals(NO_SPACE_ELEM)) {
                 try {
                     spaceAfter = Integer.parseInt(getNodeContent(current)) <= 0;
                 }
@@ -171,7 +158,9 @@ public class TreexParser implements SentenceTreeParser {
             throw new TreeParsingException(ex);
         }
         
-        TreeNode currentNode = new TreeNode(id, order, spaceAfter, content, lemma, t);
+        AnalyticalFunction afun = new AnalyticalFunction(afunString);
+        
+        TreeNode currentNode = new TreeNode(id, order, spaceAfter, content, lemma, t, afun);
         
         // If contains children element, we have to parse children
         if (childrenElement != null) {

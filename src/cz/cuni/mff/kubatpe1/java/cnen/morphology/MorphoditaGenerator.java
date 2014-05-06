@@ -9,6 +9,7 @@ package cz.cuni.mff.kubatpe1.java.cnen.morphology;
 import cz.cuni.mff.kubatpe1.java.cnen.morphology.exceptions.MorphologyGeneratingException;
 import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.Tag;
 import cz.cuni.mff.ufal.morphodita.*;
+import java.io.FileNotFoundException;
 import java.util.regex.Pattern;
 
 /**
@@ -19,9 +20,11 @@ public class MorphoditaGenerator implements MorphologyGenerator {
 
     Morpho morphology;
 
-    public MorphoditaGenerator(String dictionaryFile) {
+    public MorphoditaGenerator(String dictionaryFile) throws FileNotFoundException {
         morphology = Morpho.load(dictionaryFile);
-        // TODO: if (morphology == null) throw 
+        if (morphology == null) {
+            throw new FileNotFoundException("Dictionary file " + dictionaryFile + " doesn't exist");
+        }
     }
     
     @Override

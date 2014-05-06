@@ -4,11 +4,13 @@
  * and open the template in the editor.
  */
 
-package cz.cuni.mff.kubatpe1.java.cnen.sentencetree;
+package cz.cuni.mff.kubatpe1.java.cnen.anotations;
 
 import cz.cuni.mff.kubatpe1.java.cnen.anotations.AnotatedText;
 import cz.cuni.mff.kubatpe1.java.cnen.anotations.EntityAnotation;
 import cz.cuni.mff.kubatpe1.java.cnen.parsing.SentenceCollection;
+import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.SentenceTree;
+import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.TreeNode;
 import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.exceptions.TextMatchingException;
 import java.util.List;
 
@@ -53,20 +55,16 @@ public class TreeTextMatcher {
     private int fetchToken(AnotatedText text, int position, TreeNode currentNode) throws TextMatchingException {
         String originalText = text.getText();
         int currPos = skipWhiteSpace(originalText, position);
-        EntityAnotation entity = text.getEntityAtPosition(currPos);
-        int entityId;
+        List<EntityAnotation> entities = text.getEntitiesAtPosition(currPos);
         
-        if (entity != null) {
-            entityId = entity.getId();
-            System.out.println(currentNode.toString() + " detected as part of an entity " + entityId);
-            currentNode.setEntityId(entityId);
+        for (EntityAnotation entity: entities) {
+            int entityId = entity.getId();
+            System.err.println(currentNode.toString() + " detected as part of an entity " + entityId);
+            currentNode.addToEntity(entityId);
             entity.assignNode(currentNode);
         }
-        else {
-            entityId = -1;
-        }
         
-        String pattern = currentNode.getContent();
+        String pattern = currentNode.getContentInEntity(-1);
         for (int i = 0; i < pattern.length(); i++) {
             if (originalText.charAt(currPos + i) != pattern.charAt(i)) {
                 // Still have to check whether whitespaces inside token weren't eliminated

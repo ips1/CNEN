@@ -7,12 +7,14 @@
 package cz.cuni.mff.kubatpe1.java.cnen.sentencetree;
 
 import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.exceptions.InvalidTagException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Petr
  */
-public class Tag {
+public class Tag implements Cloneable {
     
     private static final int count = 15;
 
@@ -132,5 +134,20 @@ public class Tag {
         return number == 'P';
     }
     
+    public boolean matchesNumber(Tag otherTag) {
+        return this.number == otherTag.number;
+    }
+    
+    public boolean matcherGrCase(Tag otherTag) {
+        return this.grCase == otherTag.grCase;
+    }
+    
+    public Tag getCopy() {
+        try {
+            return (Tag)this.clone();
+        } catch (CloneNotSupportedException ex) {
+            return null;
+        }
+    }   
     
 }

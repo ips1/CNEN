@@ -36,10 +36,13 @@ public class EntitySubtreeNormalizer implements TreeAction {
         
         while (stack.size() > 0) {
             TreeNode currentNode = stack.pop();
-            int entityId = currentNode.getEntityId();
-            if (entityId != -1 && !currentNode.isNormalized()) {
-                SingleEntityNormalizer normalizer = new SingleEntityNormalizer(toSingular, entityId, mg);
-                normalizer.normalizeSubtree(currentNode);
+            List<Integer> entityIds = currentNode.getEntityIds();
+            for (Integer i: entityIds) {
+                if (!currentNode.isNormalizedInEntity(i)) {
+                    System.err.println("Starting normalization of " + i + " on " + currentNode.getContentInEntity(-1));
+                    SingleEntityNormalizer normalizer = new SingleEntityNormalizer(toSingular, i, mg);
+                    normalizer.normalizeSubtree(currentNode);
+                }
             }
             for (TreeNode childNode: currentNode.getChildren()) {
                 stack.push(childNode);
