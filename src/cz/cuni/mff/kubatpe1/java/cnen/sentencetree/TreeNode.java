@@ -69,6 +69,10 @@ public class TreeNode {
         return defaultForm.lemma;
     }
     
+    public Tag getOriginalTag() {
+        return originalForm.tag;
+    }
+    
     public Tag getTagInEntity(int entityId) {
         if (entityId == defaultFormId) {
             return defaultForm.tag;

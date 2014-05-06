@@ -235,7 +235,7 @@ public class SingleEntityNormalizer implements TreeAction {
         Tag parentTag = parent.getTagInEntity(entityId);
         Tag childTag = child.getTagInEntity(entityId);
         
-        matchTags(parentTag, childTag);
+        childTag.matchWithTag(parentTag);
         
         String oldWord = child.getContentInEntity(entityId);
         String newWord = child.getContentInEntity(entityId);
@@ -260,11 +260,25 @@ public class SingleEntityNormalizer implements TreeAction {
         // We got out of the entity, stoping normalization
         if (entityId != -1 && !child.isInEntity(entityId)) return;
         
-        // Adjectives standing on the right side of noun have to be treated as if they were on the left
+        // Attributes standing on the right side of the parent have to be reevaluated
+        if (child.getAfun().isAttribute()) {
+            Tag childTag = child.getTagInEntity(entityId);
+            if (childTag.isNoun() || childTag.isAdjective() || childTag.isPronoun() || childTag.isNumeral()) {
+                // For nouns, adjectives, numerals or pronouns we check if there was match previously
+                if (childTag.matchesGrCase(parent.getOriginalTag()) 
+                        && childTag.matchesGender(parent.getOriginalTag()) 
+                        && childTag.matchesNumber(parent.getOriginalTag())) {
+                    leftChildAction(child, parent);
+                }
+            }
+        }
+
+        /*
         if (child.getTagInEntity(entityId).isAdjective() && parent.getTagInEntity(entityId).isNoun()) {
             leftChildAction(child, parent);
             return;
         }
+        */
         
         child.setNormalizedInEntity(entityId, true);
         
@@ -295,27 +309,6 @@ public class SingleEntityNormalizer implements TreeAction {
             }
             else {
                 throw new TreeActionException("Two nodes with same order");
-            }
-        }
-    }
-    
-    /**
-     * Matches two tags in matter of grammatical number, case and gender.
-     * @param source Source of the number, case and gender
-     * @param target Tag to be matched
-     */
-    private void matchTags(Tag source, Tag target) {
-        if (source.grCase != 'X' && source.grCase != '-') {
-            target.grCase = source.grCase;
-        }
-        if (source.number != 'X' && source.number != '-') {
-            target.number = source.number;        
-        }
-        
-        // For adjectives, we match the gender as well
-        if (target.isAdjective()) {
-            if (source.gender != 'X' && source.gender != '-') {
-                target.gender = source.gender;
             }
         }
     }
