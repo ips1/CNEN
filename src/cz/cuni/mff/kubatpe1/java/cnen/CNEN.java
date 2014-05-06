@@ -56,19 +56,20 @@ public class CNEN {
         } 
         catch (UnsupportedEncodingException ex) {
             System.err.println("UTF-8 encoding must be supported!");
+            System.exit(1);
             return;
         }
         
         if (args.length < 2) {
             System.err.println("Must have at least two arguments!");
-            return;
+            System.exit(1);
         }
         
         boolean fromText = args[0].equals("-t");
         
         if (fromText && args.length < 4) {
             System.err.println("Input  and output files must be specified!");
-            return;
+            System.exit(1);
         }
         
         // Temporary file for Treex input
@@ -79,7 +80,7 @@ public class CNEN {
         } 
         catch (IOException ex) {
             System.err.println("Can't create temporary file!");
-            return;
+            System.exit(1);
         }
         
         MorphologyGenerator generator;
@@ -87,6 +88,7 @@ public class CNEN {
             generator = new MorphoditaGenerator(fromText ? args[1] : args[0]);
         } catch (FileNotFoundException ex) {
             System.err.println(ex);
+            System.exit(1);
             return;
         }
         
@@ -108,7 +110,7 @@ public class CNEN {
         catch (NormalizationException ex) {
             System.err.println("Error during the normalization:");
             System.err.println(ex);
-            return;
+            System.exit(1);
         }
     }
     
@@ -192,11 +194,11 @@ public class CNEN {
         
         AnotatedTextParser textParser = new AnotatedTextParser(input, "ne");
         try {
-            anotatedText = textParser.parseText();
+            anotatedText = textParser.parseText(true);
         } catch (AnotationParsingException ex) {
             throw new NormalizationException("Error while parsing input file: \n" + ex, ex);
         }
-        
+                
         // Store the raw text into the temporary file
         PrintStream out = null;
         try {

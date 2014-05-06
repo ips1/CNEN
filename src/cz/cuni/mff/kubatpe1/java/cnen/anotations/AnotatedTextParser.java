@@ -23,6 +23,7 @@ import org.w3c.dom.NodeList;
 public class AnotatedTextParser {
     private final String input;
     private final String entityTag;
+    private boolean addSpaces;
     private StringBuilder text;
     private List<EntityAnotation> anotations;
     private int currentId;
@@ -30,12 +31,14 @@ public class AnotatedTextParser {
     public AnotatedTextParser(String input, String entityTag) {
         this.input = input;
         this.entityTag = entityTag;
+        this.addSpaces = false;
     }
     
-    public AnotatedText parseText() throws AnotationParsingException {
+    public AnotatedText parseText(boolean addSpaces) throws AnotationParsingException {
         this.text = new StringBuilder();
         this.anotations = new ArrayList<EntityAnotation>();
         this.currentId = 0;
+        this.addSpaces = addSpaces;
         
         Document doc = null;
         try {
@@ -59,6 +62,7 @@ public class AnotatedTextParser {
             Element elem = (Element)node;
             if (elem.getTagName().equals(entityTag)) {
                 // Inside an entity anotation
+                if (addSpaces) text.append(' ');
                 int start = text.length();
                 int id = currentId++;
                 
@@ -70,6 +74,7 @@ public class AnotatedTextParser {
                 int end = text.length();
                 
                 anotations.add(new EntityAnotation(start, end, id, elem));
+                if (addSpaces) text.append(' ');
             }
             else {
                 NodeList children = elem.getChildNodes();

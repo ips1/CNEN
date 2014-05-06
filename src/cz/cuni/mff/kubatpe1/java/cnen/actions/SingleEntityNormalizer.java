@@ -117,65 +117,52 @@ public class SingleEntityNormalizer implements TreeAction {
      * @param actionType Type of action to perform on nodes connected
      */
     private void skipConjunction(TreeNode node, TreeNode parent, RecursiveActionType actionType) throws TreeActionException {
-        TreeNode lastLeft = null;
-        TreeNode firstRight = null;
-        for (TreeNode n: node.getChildren()) {
-            // We look for last left child and first right child
-            if (n.getOrder() < node.getOrder()) {
-                // Left child
-                if (lastLeft == null) {
-                    lastLeft = n;
-                }
-                else {
-                    if (lastLeft.getOrder() < n.getOrder()) {
-                        lastLeft = n;
-                    }
-                }
-            }
-            
-            if (n.getOrder() > node.getOrder()) {
-                // Right child
-                if (firstRight == null) {
-                    firstRight = n;
-                }
-                else {
-                    if (firstRight.getOrder() > n.getOrder()) {
-                        firstRight = n;
-                    }
-                }
-            }
-        }   
+        // First look if there is a concordance
+        boolean hasConcordance = false;
+        TreeNode concordanceNode = null;
         
-        if (lastLeft != null) {
-            switch (actionType) {
-                case LEFT: leftChildAction(lastLeft, parent); break;
-                case RIGHT: rightChildAction(lastLeft, parent); break;
-                case ROOT: rootAction(lastLeft); break;
-            }       
+        for (TreeNode n: node.getChildren()) {
+            if (n.getAfun().isConcordance()) {
+                hasConcordance = true;
+                concordanceNode = n;
+                break;
+            }
         }
-        
-        if (firstRight != null) {
-            switch (actionType) {
-                case LEFT: leftChildAction(firstRight, parent); break;
-                case RIGHT: rightChildAction(firstRight, parent); break;
-                case ROOT: rootAction(firstRight); break;
-            }  
-        }          
-        
-        for (TreeNode n: node.getChildren()) {
-            if (!n.isNormalizedInEntity(entityId)) {
-                if (n.getOrder() < node.getOrder()) {
-                    if (lastLeft != null) {
-                        leftChildAction(n, lastLeft);
+
+        if (hasConcordance) {
+            // There is a concordance for the conjunction
+            for (TreeNode n: node.getChildren()) {
+                if (n.getAfun().isConcordance()) {
+                    // All nodes in concordance will be the children of the conjunction's parent
+                    switch (actionType) {
+                        case LEFT: leftChildAction(n, parent); break;
+                        case RIGHT: rightChildAction(n, parent); break;
+                        case ROOT: rootAction(n); break;
                     }
                 }
                 else {
-                    if (firstRight != null) {
-                        rightChildAction(n, firstRight);                        
+                    // All other nodes will be children of the first node in concordance
+                    if (n.getOrder() < node.getOrder()) {
+                        leftChildAction(n, concordanceNode);
                     }
+                    else {
+                        rightChildAction(n, concordanceNode);
+                    }
+                }
+            }            
+        }
+        else {
+            // There is no concordance
+            // All nodes will be children of the conjunction's parent
+            for (TreeNode n: node.getChildren()) {
+                switch (actionType) {
+                    case LEFT: leftChildAction(n, parent); break;
+                    case RIGHT: rightChildAction(n, parent); break;
+                    case ROOT: rootAction(n); break;
                 }
             }
         }
+        
     }
     
     /**

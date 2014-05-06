@@ -157,6 +157,10 @@ public class TreeNode {
         return (spaceAfter ? str + ' ' : str);
     }
     
+    public AnalyticalFunction getAfun() {
+        return afun;
+    }
+    
     @Override
     public String toString() {
         return stringFromEntity(defaultFormId);
