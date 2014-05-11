@@ -87,7 +87,7 @@ public class SingleEntityNormalizer implements TreeAction {
      */
     private boolean isNormalizedTag(Tag t) {
         boolean normalized = true;
-        if (t.grCase != '1') {
+        if (t.grCase != '1' && t.grCase != 'X' && t.grCase != '-') {
             normalized = false;
         }
         if (toSingular && !t.isSingular()) {
@@ -117,23 +117,27 @@ public class SingleEntityNormalizer implements TreeAction {
      * @param actionType Type of action to perform on nodes connected
      */
     private void skipConjunction(TreeNode node, TreeNode parent, RecursiveActionType actionType) throws TreeActionException {
-        // First look if there is a concordance
-        boolean hasConcordance = false;
-        TreeNode concordanceNode = null;
+        if (node.isInEntity(entityId)) {
+            node.setNormalizedInEntity(entityId, true);
+        }
+        
+        // First look if there is a coordination
+        boolean hasCoordination = false;
+        TreeNode coordinationNode = null;
         
         for (TreeNode n: node.getChildren()) {
-            if (n.getAfun().isConcordance()) {
-                hasConcordance = true;
-                concordanceNode = n;
+            if (n.getAfun().isCoordination()) {
+                hasCoordination = true;
+                coordinationNode = n;
                 break;
             }
         }
 
-        if (hasConcordance) {
-            // There is a concordance for the conjunction
+        if (hasCoordination) {
+            // There is a coordination for the conjunction
             for (TreeNode n: node.getChildren()) {
-                if (n.getAfun().isConcordance()) {
-                    // All nodes in concordance will be the children of the conjunction's parent
+                if (n.getAfun().isCoordination()) {
+                    // All nodes in coordination will be the children of the conjunction's parent
                     switch (actionType) {
                         case LEFT: leftChildAction(n, parent); break;
                         case RIGHT: rightChildAction(n, parent); break;
@@ -143,16 +147,16 @@ public class SingleEntityNormalizer implements TreeAction {
                 else {
                     // All other nodes will be children of the first node in concordance
                     if (n.getOrder() < node.getOrder()) {
-                        leftChildAction(n, concordanceNode);
+                        leftChildAction(n, coordinationNode);
                     }
                     else {
-                        rightChildAction(n, concordanceNode);
+                        rightChildAction(n, coordinationNode);
                     }
                 }
             }            
         }
         else {
-            // There is no concordance
+            // There is no coordination
             // All nodes will be children of the conjunction's parent
             for (TreeNode n: node.getChildren()) {
                 switch (actionType) {
@@ -265,9 +269,11 @@ public class SingleEntityNormalizer implements TreeAction {
             Tag childTag = child.getTagInEntity(entityId);
             if (childTag.isNoun() || childTag.isAdjective() || childTag.isPronoun() || childTag.isNumeral()) {
                 // For nouns, adjectives, numerals or pronouns we check if there was match previously
+                // Additionally, we check if the child was immediately preceeded by the parent
                 if (childTag.matchesGrCase(parent.getOriginalTag()) 
                         && childTag.matchesGender(parent.getOriginalTag()) 
-                        && childTag.matchesNumber(parent.getOriginalTag())) {
+                        && childTag.matchesNumber(parent.getOriginalTag())
+                        && (child.getOrder() - parent.getOrder() == 1)) {
                     leftChildAction(child, parent);
                 }
             }

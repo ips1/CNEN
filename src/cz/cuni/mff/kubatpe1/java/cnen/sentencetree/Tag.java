@@ -81,7 +81,7 @@ public class Tag implements Cloneable {
         return sb.toString();
     }
     
-    public String toWildcardString() {
+    public String toWildcardString(boolean wildcardVariant) {
         StringBuilder sb = new StringBuilder();
         sb.append(wordClass == '-' ? '?' : wordClass);
         sb.append(wordSubClass == '-' ? '?' : wordSubClass);
@@ -97,7 +97,12 @@ public class Tag implements Cloneable {
         sb.append(activity == '-' ? '?' : activity);
         sb.append('?');
         sb.append('?');
-        sb.append(variant == '-' ? '?' : variant);
+        if (wildcardVariant) {
+            sb.append('?');
+        }
+        else {
+            sb.append(variant == '-' ? '?' : variant);
+        }
 
         return sb.toString();
     }
@@ -162,6 +167,8 @@ public class Tag implements Cloneable {
         if (source.grCase != 'X' && source.grCase != '-') {
             this.grCase = source.grCase;
         }
+        
+        /*
         if (source.number != 'X' && source.number != '-') {
             this.number = source.number;        
         }
@@ -172,6 +179,7 @@ public class Tag implements Cloneable {
                 this.gender = source.gender;
             }
         }
+                */
     }
     
     public Tag getCopy() {

@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -157,23 +158,26 @@ public class CNEN {
         out.close();
         
         // Parse sentence trees from the input file
-        SentenceCollection treeList;
+        List<SentenceCollection> treeList;
         try {
-            treeList = parser.parseDocument(tmpFileName);
+            treeList = parser.parseDocumentSet(tmpFileName);
         } catch (TreeParsingException ex) {
             throw new NormalizationException("Error parsing the Treex output!", ex);
         }
         
-        // Apply normalizer on each of the trees, collect the result on the way
         StringBuilder result = new StringBuilder();
-        for (SentenceTree tree: treeList.getTrees()) {
-            try {
-                normalizer.runOnTree(tree);
-            } catch (TreeActionException ex) {
-                System.err.println("Error during the normalization: " + ex);
+        // Apply normalizer on each of the trees for each entity, collect the result on the way
+        for (SentenceCollection col: treeList) {
+            for (SentenceTree tree: col.getTrees()) {
+                try {
+                    normalizer.runOnTree(tree);
+                } catch (TreeActionException ex) {
+                    System.err.println("Error during the normalization: " + ex);
+                }
+                result.append(tree.toString());
+                result.append(' ');
             }
-            result.append(tree.toString());
-            result.append(' ');
+            result.append('\n');
         }
         
         return result.toString();

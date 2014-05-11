@@ -79,7 +79,7 @@ public class TreexInterface {
             
             String base = removeSuffix(inputFile);
             
-            for (int i = 0; i < resultNumber; i++) {
+            for (int i = 1; i <= resultNumber; i++) {
                 results.add(base + String.format("%03d.treex", i));
             }
             

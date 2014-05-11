@@ -37,12 +37,17 @@ public class MorphoditaGenerator implements MorphologyGenerator {
         
         if (lemmasForms.isEmpty()) {
             // Can't generate exact form, we try to use wildcard
-            tagString = targetTag.toWildcardString();
+            tagString = targetTag.toWildcardString(false);
             lemmasForms = new TaggedLemmasForms();
             morphology.generate(cleanLemma, tagString, 1, lemmasForms);
             if (lemmasForms.isEmpty()) {
-                // Can't generate even for wildcard - throwing exception
-                throw new MorphologyGeneratingException("Can't generate " + tagString + " for " + cleanLemma);
+                // Can't generate even for wildcard
+                tagString = targetTag.toWildcardString(true);
+                lemmasForms = new TaggedLemmasForms();
+                morphology.generate(cleanLemma, tagString, 1, lemmasForms);
+                if (lemmasForms.isEmpty()) {
+                    throw new MorphologyGeneratingException("Can't generate " + tagString + " for " + cleanLemma);
+                }
             }
         }
         TaggedForms taggedForms = lemmasForms.get(0).getForms();

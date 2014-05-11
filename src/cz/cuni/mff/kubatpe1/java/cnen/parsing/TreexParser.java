@@ -15,6 +15,8 @@ import cz.cuni.mff.kubatpe1.java.cnen.parsing.exceptions.TreeParsingException;
 import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.AnalyticalFunction;
 import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.exceptions.InvalidTagException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
@@ -41,6 +43,7 @@ public class TreexParser implements SentenceTreeParser {
     private static final String ORD_ELEM = "ord";
     private static final String NO_SPACE_ELEM = "no_space_after";
     private static final String AFUN_ELEM = "afun";
+    private static final String IS_MEMEBER_ELEM = "is_member";
     
     private static final String DEF_TAG = "---------------";
     
@@ -100,6 +103,8 @@ public class TreexParser implements SentenceTreeParser {
         String tagString = DEF_TAG;
         String afunString = "";
         
+        boolean isMember = false;
+        
         Element childrenElement = null;
         
         // Iterating through all the children
@@ -139,6 +144,9 @@ public class TreexParser implements SentenceTreeParser {
             else if (elemName.equals(AFUN_ELEM)) {
                 afunString = getNodeContent(current);
             }
+            else if (elemName.equals(IS_MEMEBER_ELEM)) {
+                isMember = true;
+            }
             else if (elemName.equals(NO_SPACE_ELEM)) {
                 try {
                     spaceAfter = Integer.parseInt(getNodeContent(current)) <= 0;
@@ -158,7 +166,7 @@ public class TreexParser implements SentenceTreeParser {
             throw new TreeParsingException(ex);
         }
         
-        AnalyticalFunction afun = new AnalyticalFunction(afunString);
+        AnalyticalFunction afun = new AnalyticalFunction(afunString, isMember);
         
         TreeNode currentNode = new TreeNode(id, order, spaceAfter, content, lemma, t, afun);
         
@@ -196,6 +204,13 @@ public class TreexParser implements SentenceTreeParser {
             throw new TreeParsingException("Invalid element content");
         }
         return (childNodes.item(0).getNodeValue());
+    }
+
+    @Override
+    public List<SentenceCollection> parseDocumentSet(String path) throws TreeParsingException {
+        List<SentenceCollection> result = new ArrayList<SentenceCollection>();
+        result.add(parseDocument(path));
+        return result;
     }
     
 }

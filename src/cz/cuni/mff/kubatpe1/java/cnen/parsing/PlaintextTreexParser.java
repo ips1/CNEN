@@ -50,6 +50,7 @@ public class PlaintextTreexParser implements SentenceTreeParser {
      * @return List of SentenceCollectons parsed
      * @throws TreeParsingException Parsing failed
      */
+    @Override
     public List<SentenceCollection> parseDocumentSet(String path) throws TreeParsingException {
         return runTreexAndParse(path, true);
     }
@@ -72,6 +73,7 @@ public class PlaintextTreexParser implements SentenceTreeParser {
     
         for (int i = 0; i < fileNames.size(); i++) {
             String fileName = fileNames.get(i);
+            System.err.println("Parsing file " + fileName);
             sentences.add(parser.parseDocument(fileName));
             File tmpFile = new File(fileName);
             if (!tmpFile.delete()) {

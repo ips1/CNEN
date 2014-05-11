@@ -12,9 +12,11 @@ package cz.cuni.mff.kubatpe1.java.cnen.sentencetree;
  */
 public class AnalyticalFunction {
     private String afun;
+    private boolean coordination;
     
-    public AnalyticalFunction(String afun) {
+    public AnalyticalFunction(String afun, boolean coordination) {
         this.afun = afun;
+        this.coordination = coordination;
     }
     
     public boolean isAttribute() {
@@ -23,7 +25,7 @@ public class AnalyticalFunction {
         return (afun.substring(0, 3).equals("Atr"));
     }
     
-    public boolean isConcordance() {
-        return (afun.indexOf("_Co") >= 0);
+    public boolean isCoordination() {
+        return coordination;
     }
 }

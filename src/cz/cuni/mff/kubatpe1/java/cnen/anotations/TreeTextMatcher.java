@@ -45,8 +45,9 @@ public class TreeTextMatcher {
         for (SentenceTree currentTree: treeSet.getTrees()) {
             List<TreeNode> linearTree = currentTree.getLinearRepresentation();
             
-            for (TreeNode currentNode: linearTree) {
-                currentPosition = fetchToken(text, currentPosition, currentNode);
+            // Skipping the first node as it is the unused root
+            for (int i = 1; i < linearTree.size(); i++) {
+                currentPosition = fetchToken(text, currentPosition, linearTree.get(i));
             }
         }
         
