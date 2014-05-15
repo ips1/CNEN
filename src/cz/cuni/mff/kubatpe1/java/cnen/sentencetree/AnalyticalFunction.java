@@ -19,7 +19,6 @@ public class AnalyticalFunction {
     
     public boolean isAttribute() {
         if (afun.length() < 3) return false;
-        
         return (afun.substring(0, 3).equals("Atr"));
     }
     
