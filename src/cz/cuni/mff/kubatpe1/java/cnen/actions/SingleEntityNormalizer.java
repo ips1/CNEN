@@ -87,7 +87,7 @@ public class SingleEntityNormalizer implements TreeAction {
      */
     private boolean isNormalizedTag(Tag t) {
         boolean normalized = true;
-        if (t.grCase != '1') {
+        if (t.grCase != '1' && t.grCase != 'X' && t.grCase != '-') {
             normalized = false;
         }
         if (toSingular && !t.isSingular()) {
@@ -117,65 +117,56 @@ public class SingleEntityNormalizer implements TreeAction {
      * @param actionType Type of action to perform on nodes connected
      */
     private void skipConjunction(TreeNode node, TreeNode parent, RecursiveActionType actionType) throws TreeActionException {
-        TreeNode lastLeft = null;
-        TreeNode firstRight = null;
-        for (TreeNode n: node.getChildren()) {
-            // We look for last left child and first right child
-            if (n.getOrder() < node.getOrder()) {
-                // Left child
-                if (lastLeft == null) {
-                    lastLeft = n;
-                }
-                else {
-                    if (lastLeft.getOrder() < n.getOrder()) {
-                        lastLeft = n;
-                    }
-                }
-            }
-            
-            if (n.getOrder() > node.getOrder()) {
-                // Right child
-                if (firstRight == null) {
-                    firstRight = n;
-                }
-                else {
-                    if (firstRight.getOrder() > n.getOrder()) {
-                        firstRight = n;
-                    }
-                }
-            }
-        }   
-        
-        if (lastLeft != null) {
-            switch (actionType) {
-                case LEFT: leftChildAction(lastLeft, parent); break;
-                case RIGHT: rightChildAction(lastLeft, parent); break;
-                case ROOT: rootAction(lastLeft); break;
-            }       
+        if (node.isInEntity(entityId)) {
+            node.setNormalizedInEntity(entityId, true);
         }
         
-        if (firstRight != null) {
-            switch (actionType) {
-                case LEFT: leftChildAction(firstRight, parent); break;
-                case RIGHT: rightChildAction(firstRight, parent); break;
-                case ROOT: rootAction(firstRight); break;
-            }  
-        }          
+        // First look if there is a coordination
+        boolean hasCoordination = false;
+        TreeNode coordinationNode = null;
         
         for (TreeNode n: node.getChildren()) {
-            if (!n.isNormalizedInEntity(entityId)) {
-                if (n.getOrder() < node.getOrder()) {
-                    if (lastLeft != null) {
-                        leftChildAction(n, lastLeft);
+            if (n.getAfun().isCoordination()) {
+                hasCoordination = true;
+                coordinationNode = n;
+                break;
+            }
+        }
+
+        if (hasCoordination) {
+            // There is a coordination for the conjunction
+            for (TreeNode n: node.getChildren()) {
+                if (n.getAfun().isCoordination()) {
+                    // All nodes in coordination will be the children of the conjunction's parent
+                    switch (actionType) {
+                        case LEFT: leftChildAction(n, parent); break;
+                        case RIGHT: rightChildAction(n, parent); break;
+                        case ROOT: rootAction(n); break;
                     }
                 }
                 else {
-                    if (firstRight != null) {
-                        rightChildAction(n, firstRight);                        
+                    // All other nodes will be children of the first node in concordance
+                    if (n.getOrder() < node.getOrder()) {
+                        leftChildAction(n, coordinationNode);
                     }
+                    else {
+                        rightChildAction(n, coordinationNode);
+                    }
+                }
+            }            
+        }
+        else {
+            // There is no coordination
+            // All nodes will be children of the conjunction's parent
+            for (TreeNode n: node.getChildren()) {
+                switch (actionType) {
+                    case LEFT: leftChildAction(n, parent); break;
+                    case RIGHT: rightChildAction(n, parent); break;
+                    case ROOT: rootAction(n); break;
                 }
             }
         }
+        
     }
     
     /**
@@ -248,7 +239,7 @@ public class SingleEntityNormalizer implements TreeAction {
         Tag parentTag = parent.getTagInEntity(entityId);
         Tag childTag = child.getTagInEntity(entityId);
         
-        matchTags(parentTag, childTag);
+        childTag.matchWithTag(parentTag);
         
         String oldWord = child.getContentInEntity(entityId);
         String newWord = child.getContentInEntity(entityId);
@@ -273,11 +264,27 @@ public class SingleEntityNormalizer implements TreeAction {
         // We got out of the entity, stoping normalization
         if (entityId != -1 && !child.isInEntity(entityId)) return;
         
-        // Adjectives standing on the right side of noun have to be treated as if they were on the left
+        // Attributes standing on the right side of the parent have to be reevaluated
+        if (child.getAfun().isAttribute()) {
+            Tag childTag = child.getTagInEntity(entityId);
+            if (childTag.isNoun() || childTag.isAdjective() || childTag.isPronoun() || childTag.isNumeral()) {
+                // For nouns, adjectives, numerals or pronouns we check if there was match previously
+                // Additionally, we check if the child was immediately preceeded by the parent
+                if (childTag.matchesGrCase(parent.getOriginalTag()) 
+                        && childTag.matchesGender(parent.getOriginalTag()) 
+                        && childTag.matchesNumber(parent.getOriginalTag())
+                        && (child.getOrder() - parent.getOrder() == 1)) {
+                    leftChildAction(child, parent);
+                }
+            }
+        }
+
+        /*
         if (child.getTagInEntity(entityId).isAdjective() && parent.getTagInEntity(entityId).isNoun()) {
             leftChildAction(child, parent);
             return;
         }
+        */
         
         child.setNormalizedInEntity(entityId, true);
         
@@ -308,27 +315,6 @@ public class SingleEntityNormalizer implements TreeAction {
             }
             else {
                 throw new TreeActionException("Two nodes with same order");
-            }
-        }
-    }
-    
-    /**
-     * Matches two tags in matter of grammatical number, case and gender.
-     * @param source Source of the number, case and gender
-     * @param target Tag to be matched
-     */
-    private void matchTags(Tag source, Tag target) {
-        if (source.grCase != 'X' && source.grCase != '-') {
-            target.grCase = source.grCase;
-        }
-        if (source.number != 'X' && source.number != '-') {
-            target.number = source.number;        
-        }
-        
-        // For adjectives, we match the gender as well
-        if (target.isAdjective()) {
-            if (source.gender != 'X' && source.gender != '-') {
-                target.gender = source.gender;
             }
         }
     }

@@ -119,6 +119,13 @@ public class AnotatedText {
         }
     }
     
+    public void updateNormalizedNames(String normalizedNameAttributeName) {
+        for (EntityAnotation entity: anotations) {
+            Element anotationElement = entity.getAnotationElement();
+            anotationElement.setAttribute(normalizedNameAttributeName, entity.getNormalizedName());
+        }
+    }
+    
     public String getContentForEntityAnotation(int i) {
         return originalText.substring(anotations.get(i).getBegin(), anotations.get(i).getEnd());
     }

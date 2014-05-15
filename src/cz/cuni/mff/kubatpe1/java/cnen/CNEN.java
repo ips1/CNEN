@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -56,19 +57,20 @@ public class CNEN {
         } 
         catch (UnsupportedEncodingException ex) {
             System.err.println("UTF-8 encoding must be supported!");
+            System.exit(1);
             return;
         }
         
         if (args.length < 2) {
             System.err.println("Must have at least two arguments!");
-            return;
+            System.exit(1);
         }
         
         boolean fromText = args[0].equals("-t");
         
         if (fromText && args.length < 4) {
             System.err.println("Input  and output files must be specified!");
-            return;
+            System.exit(1);
         }
         
         // Temporary file for Treex input
@@ -79,7 +81,7 @@ public class CNEN {
         } 
         catch (IOException ex) {
             System.err.println("Can't create temporary file!");
-            return;
+            System.exit(1);
         }
         
         MorphologyGenerator generator;
@@ -87,6 +89,7 @@ public class CNEN {
             generator = new MorphoditaGenerator(fromText ? args[1] : args[0]);
         } catch (FileNotFoundException ex) {
             System.err.println(ex);
+            System.exit(1);
             return;
         }
         
@@ -108,7 +111,7 @@ public class CNEN {
         catch (NormalizationException ex) {
             System.err.println("Error during the normalization:");
             System.err.println(ex);
-            return;
+            System.exit(1);
         }
     }
     
@@ -155,23 +158,26 @@ public class CNEN {
         out.close();
         
         // Parse sentence trees from the input file
-        SentenceCollection treeList;
+        List<SentenceCollection> treeList;
         try {
-            treeList = parser.parseDocument(tmpFileName);
+            treeList = parser.parseDocumentSet(tmpFileName);
         } catch (TreeParsingException ex) {
             throw new NormalizationException("Error parsing the Treex output!", ex);
         }
         
-        // Apply normalizer on each of the trees, collect the result on the way
         StringBuilder result = new StringBuilder();
-        for (SentenceTree tree: treeList.getTrees()) {
-            try {
-                normalizer.runOnTree(tree);
-            } catch (TreeActionException ex) {
-                System.err.println("Error during the normalization: " + ex);
+        // Apply normalizer on each of the trees for each entity, collect the result on the way
+        for (SentenceCollection col: treeList) {
+            for (SentenceTree tree: col.getTrees()) {
+                try {
+                    normalizer.runOnTree(tree);
+                } catch (TreeActionException ex) {
+                    System.err.println("Error during the normalization: " + ex);
+                }
+                result.append(tree.toString());
+                result.append(' ');
             }
-            result.append(tree.toString());
-            result.append(' ');
+            result.append('\n');
         }
         
         return result.toString();
@@ -192,11 +198,11 @@ public class CNEN {
         
         AnotatedTextParser textParser = new AnotatedTextParser(input, "ne");
         try {
-            anotatedText = textParser.parseText();
+            anotatedText = textParser.parseText(true);
         } catch (AnotationParsingException ex) {
             throw new NormalizationException("Error while parsing input file: \n" + ex, ex);
         }
-        
+                
         // Store the raw text into the temporary file
         PrintStream out = null;
         try {

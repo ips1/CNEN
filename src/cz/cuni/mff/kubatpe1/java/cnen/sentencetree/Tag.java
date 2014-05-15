@@ -81,7 +81,7 @@ public class Tag implements Cloneable {
         return sb.toString();
     }
     
-    public String toWildcardString() {
+    public String toWildcardString(boolean wildcardVariant) {
         StringBuilder sb = new StringBuilder();
         sb.append(wordClass == '-' ? '?' : wordClass);
         sb.append(wordSubClass == '-' ? '?' : wordSubClass);
@@ -97,7 +97,12 @@ public class Tag implements Cloneable {
         sb.append(activity == '-' ? '?' : activity);
         sb.append('?');
         sb.append('?');
-        sb.append(variant == '-' ? '?' : variant);
+        if (wildcardVariant) {
+            sb.append('?');
+        }
+        else {
+            sb.append(variant == '-' ? '?' : variant);
+        }
 
         return sb.toString();
     }
@@ -112,6 +117,14 @@ public class Tag implements Cloneable {
     
     public boolean isAdjective() {
         return wordClass == 'A';
+    }
+    
+    public boolean isPronoun() {
+        return wordClass == 'P';
+    }
+    
+    public boolean isNumeral() {
+        return wordClass == 'N';
     }
     
     public boolean isPunctuation() {
@@ -138,8 +151,35 @@ public class Tag implements Cloneable {
         return this.number == otherTag.number;
     }
     
-    public boolean matcherGrCase(Tag otherTag) {
+    public boolean matchesGrCase(Tag otherTag) {
         return this.grCase == otherTag.grCase;
+    }
+    
+    public boolean matchesGender(Tag otherTag) {
+        return this.gender == otherTag.gender;
+    }
+    
+    /**
+     * Matches the tag to another in matter of grammatical number, case and gender.
+     * @param source Source of the number, case and gender
+     */
+    public void matchWithTag(Tag source) {
+        if (source.grCase != 'X' && source.grCase != '-') {
+            this.grCase = source.grCase;
+        }
+        
+        /*
+        if (source.number != 'X' && source.number != '-') {
+            this.number = source.number;        
+        }
+        
+        // For adjectives, we match the gender as well
+        if (this.isAdjective()) {
+            if (source.gender != 'X' && source.gender != '-') {
+                this.gender = source.gender;
+            }
+        }
+                */
     }
     
     public Tag getCopy() {
