@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package cz.cuni.mff.kubatpe1.java.cnen.parsing;
 
@@ -14,26 +9,21 @@ import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.TreeNode;
 import cz.cuni.mff.kubatpe1.java.cnen.parsing.exceptions.TreeParsingException;
 import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.AnalyticalFunction;
 import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.exceptions.InvalidTagException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 /**
- *
- * @author Petr
+ * Class for parsing the treex files with m-layer and a-layer text analysis
+ * into SentenceTrees.
+ * @author Petr Kubat
  */
 public class TreexParser implements SentenceTreeParser {
 
+    // treex element names
     private static final String TREE_ROOT = "a_tree";
     private static final String ID_ATTR = "id";
     private static final String CHILDREN_ELEM = "children";
@@ -45,6 +35,7 @@ public class TreexParser implements SentenceTreeParser {
     private static final String AFUN_ELEM = "afun";
     private static final String IS_MEMEBER_ELEM = "is_member";
     
+    // Default content of a tag
     private static final String DEF_TAG = "---------------";
     
     @Override
@@ -58,11 +49,11 @@ public class TreexParser implements SentenceTreeParser {
     }
     
     /**
-     * Parses sentence tree from a DOM document.
+     * Parses SentenceCollection from a treex DOM document.
      * Must have specific Treex format!
-     * @param doc Document to parse from
-     * @return Parsed sentence tree
-     * @throws TreeParsingException Document can't be parsed
+     * @param doc Document to parse from.
+     * @return Parsed SentenceCollection.
+     * @throws TreeParsingException Parsing failed.
      */
     private SentenceCollection parseDOM(Document doc) throws TreeParsingException {
         // Searching for a root element
@@ -197,8 +188,9 @@ public class TreexParser implements SentenceTreeParser {
         
         
     }
-    
+   
     private String getNodeContent(Node n) throws TreeParsingException {
+        // Fetches textual content of a single node in DOM tree
         NodeList childNodes = n.getChildNodes();
         if (childNodes.getLength() != 1) {
             throw new TreeParsingException("Invalid element content");
@@ -206,6 +198,12 @@ public class TreexParser implements SentenceTreeParser {
         return (childNodes.item(0).getNodeValue());
     }
 
+    /**
+     * Parses one document and returns it as a one-element list.
+     * @param path Document to parse from.
+     * @return List containing single SentenceCollection.
+     * @throws TreeParsingException Parsing failed.
+     */
     @Override
     public List<SentenceCollection> parseDocumentSet(String path) throws TreeParsingException {
         List<SentenceCollection> result = new ArrayList<SentenceCollection>();

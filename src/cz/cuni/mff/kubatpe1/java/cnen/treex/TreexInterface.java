@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package cz.cuni.mff.kubatpe1.java.cnen.treex;
 
@@ -12,22 +7,22 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Class for running the Treex external program and fetching its results.
- * @author petrkubat
+ * @author Petr Kubat
  */
 public class TreexInterface {
     
     /**
-     * Runs a Treex instance with specified parameters
-     * @param inputFile Input file for the Treex
-     * @param scenario Scenario without the reader and writer blocks
-     * @param oneDocPerLine Specifies whether each line should be considered a new document
-     * @return List of result file names - if oneDocPerLine is true, more than one file name might be returned
-     * @throws TreexException Error when running the Treex process
+     * Runs a Treex instance with specified parameters.
+     * @param inputFile Input file for the Treex.
+     * @param scenario Scenario without the reader and writer blocks.
+     * @param oneDocPerLine Specifies whether each line should be considered a 
+     * new document.
+     * @return List of result file names - if oneDocPerLine is true, more than 
+     * one file name might be returned.
+     * @throws TreexException Error when running the Treex process.
      */
     public static List<String> runTreex(String inputFile, String scenario, boolean oneDocPerLine) throws TreexException {
         String docPerLine = oneDocPerLine ? "lines_per_doc=1 " : "";

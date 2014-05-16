@@ -1,13 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package cz.cuni.mff.kubatpe1.java.cnen.parsing.exceptions;
 
 /**
- *
+ * Exception thrown when Treex format parsing failed.
  * @author Petr
  */
 public class TreeParsingException extends Exception {

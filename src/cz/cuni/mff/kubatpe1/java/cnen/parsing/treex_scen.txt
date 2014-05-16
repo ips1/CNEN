@@ -1,0 +1,10 @@
+W2A::CS::Segment
+W2A::CS::Tokenize
+W2A::CS::TagFeaturama lemmatize=1
+W2A::CS::FixMorphoErrors
+W2A::CS::ParseMSTAdapted
+W2A::CS::FixAtreeAfterMcD
+W2A::CS::FixIsMember
+W2A::CS::FixPrepositionalCase
+W2A::CS::FixReflexiveTantum
+W2A::CS::FixReflexivePronouns

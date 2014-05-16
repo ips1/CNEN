@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package cz.cuni.mff.kubatpe1.java.cnen.parsing;
 
@@ -12,11 +7,15 @@ import java.util.List;
 
 /**
  * Class serving as a collection of sentence trees.
- * @author petrkubat
+ * Simple wrapper for ArrayList.
+ * @author Petr Kubat
  */
 public class SentenceCollection {
     private List<SentenceTree> trees;
     
+    /**
+     * Default constructor for the SentenceCollection class.
+     */
     public SentenceCollection() {
         trees = new ArrayList<SentenceTree>();
     }

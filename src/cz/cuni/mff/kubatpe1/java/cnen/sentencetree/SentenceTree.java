@@ -1,41 +1,51 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package cz.cuni.mff.kubatpe1.java.cnen.sentencetree;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 
 /**
- *
- * @author Petr
+ * Class representing an a-layer dependency tree of a Czech sentence according 
+ * to PDT.
+ * @author Petr Kubat
  */
 public class SentenceTree {
-    private TreeNode root;
-    private int nodeCount; 
+    
+    private final TreeNode root;
+    private final int nodeCount; 
 
+    /**
+     * Default constructor for the SentenceTree class.
+     * Takes a root node for a fully constructed tree.
+     * @param root 
+     */
     public SentenceTree(TreeNode root) {
         this.root = root;
-        this.nodeCount = root.getChildCount() + 1;
+        this.nodeCount = root.getChildrenCount() + 1;
     }
     
+    /**
+     * Gets the root node.
+     * @return Root node of the tree.
+     */
     public TreeNode getRoot() {
         return root;
     }
     
+    /**
+     * Linearizes the tree according to the original sentence ordering.
+     * @return List of nodes sorted according to the original sentence ordering.
+     */
     public List<TreeNode> getLinearRepresentation() {
         List<TreeNode> list = new ArrayList<TreeNode>();
-        
-        /* Setting the size of the list */
+
+        // Setting the list size
         for (int i = 0; i < nodeCount; i++) {
             list.add(null);
         }
         
+        // Tree DFS
         Stack<TreeNode> stack = new Stack<TreeNode>();
         stack.push(root);
         
@@ -45,13 +55,16 @@ public class SentenceTree {
                 stack.push(child);
             }
             
-            // TODO: implement security
             list.set(current.getOrder(), current);
         }
         
         return list;
     }
     
+    /**
+     * Reconstructs the sentence from the tree.
+     * @return String containing the sentence.
+     */
     @Override
     public String toString() {
         List<TreeNode> list = getLinearRepresentation();

@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package cz.cuni.mff.kubatpe1.java.cnen;
 
@@ -10,9 +5,9 @@ import cz.cuni.mff.kubatpe1.java.cnen.actions.SingleEntityNormalizer;
 import cz.cuni.mff.kubatpe1.java.cnen.actions.EntitySubtreeNormalizer;
 import cz.cuni.mff.kubatpe1.java.cnen.actions.TreeAction;
 import cz.cuni.mff.kubatpe1.java.cnen.actions.TreeActionException;
-import cz.cuni.mff.kubatpe1.java.cnen.anotations.AnotatedText;
-import cz.cuni.mff.kubatpe1.java.cnen.anotations.AnotatedTextParser;
-import cz.cuni.mff.kubatpe1.java.cnen.anotations.AnotationParsingException;
+import cz.cuni.mff.kubatpe1.java.cnen.annotations.AnnotatedText;
+import cz.cuni.mff.kubatpe1.java.cnen.annotations.AnnotatedTextParser;
+import cz.cuni.mff.kubatpe1.java.cnen.annotations.AnnotationParsingException;
 import cz.cuni.mff.kubatpe1.java.cnen.morphology.MorphoditaGenerator;
 import cz.cuni.mff.kubatpe1.java.cnen.morphology.MorphologyGenerator;
 import cz.cuni.mff.kubatpe1.java.cnen.parsing.PlaintextTreexParser;
@@ -20,7 +15,7 @@ import cz.cuni.mff.kubatpe1.java.cnen.parsing.SentenceCollection;
 import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.SentenceTree;
 import cz.cuni.mff.kubatpe1.java.cnen.parsing.SentenceTreeParser;
 import cz.cuni.mff.kubatpe1.java.cnen.parsing.exceptions.TreeParsingException;
-import cz.cuni.mff.kubatpe1.java.cnen.anotations.TreeTextMatcher;
+import cz.cuni.mff.kubatpe1.java.cnen.annotations.TreeTextMatcher;
 import cz.cuni.mff.kubatpe1.java.cnen.dom.DOMException;
 import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.exceptions.TextMatchingException;
 import java.io.BufferedReader;
@@ -33,24 +28,31 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Main class of the CNEN project, provides high-level normalization interface.
- * @author Petr
+ * @author Petr Kubat
  */
 public class CNEN {
 
+    private static final String entityElement = "ne";
+    
+    
     /**
      * Main method - runs all the normalization modes.
-     * Mode is specified by a option passed as an argument
+     * Mode is specified by a option passed as an argument.
+     * If the first argument is "-t", the entities in text are normalized.
+     * The other arguments have to be paths to the morphological dictionary, 
+     * input and output files.
+     * Otherwise, single entity is normalized, and the first argument is path 
+     * to the morphological dictionary and the second path to the input file.
      * @param args the command line arguments
      */
     public static void main(String[] args) {
                
         // Prepare encoding for input and output
         System.setProperty("file.encoding", "utf-8");
+        // Output stream for printing to the standard output in UTF-8
         PrintStream stdout;
         try {
             stdout = new PrintStream(System.out, true, "UTF-8");
@@ -61,6 +63,8 @@ public class CNEN {
             return;
         }
         
+        // Argument check and mode selection
+        
         if (args.length < 2) {
             System.err.println("Must have at least two arguments!");
             System.exit(1);
@@ -69,7 +73,7 @@ public class CNEN {
         boolean fromText = args[0].equals("-t");
         
         if (fromText && args.length < 4) {
-            System.err.println("Input  and output files must be specified!");
+            System.err.println("Input and output files must be specified!");
             System.exit(1);
         }
         
@@ -84,6 +88,7 @@ public class CNEN {
             System.exit(1);
         }
         
+        // Morphology generator based on the passed morphological dictionary
         MorphologyGenerator generator;
         try {
             generator = new MorphoditaGenerator(fromText ? args[1] : args[0]);
@@ -93,8 +98,9 @@ public class CNEN {
             return;
         }
         
-        
+        // Normalizer to be used on the tree loaded
         TreeAction normalizer = fromText ? new EntitySubtreeNormalizer(false, generator) : new SingleEntityNormalizer(false, -1, generator);
+        // Parser to get the trees from input text
         SentenceTreeParser parser = new PlaintextTreexParser();
         
         try {
@@ -116,16 +122,16 @@ public class CNEN {
     }
     
     /**
-     * Normalizes one entity using specified parser and normalizer.
-     * @param input Input file containing single entity
+     * Normalizes single entities using specified parser and normalizer.
+     * @param input Input file containing lines with single entities
      * @param tmpFileName Path to a temporary file to be used by the procedure
      * @param parser Parser used to get sentence trees from the text
      * @param normalizer Normalizer used to normalize the trees
-     * @return String containing normalized named entity
+     * @return String containing normalized named entities
      * @throws NormalizationException Normalization failed
      */
     public static String normalizeSingleEntity(String input, String tmpFileName, SentenceTreeParser parser, TreeAction normalizer) throws NormalizationException {
-        // Read the entity
+        // Reading the input file
         BufferedReader in;
         try {
             in = new BufferedReader(new InputStreamReader(new FileInputStream(input), "UTF8"));
@@ -145,7 +151,7 @@ public class CNEN {
             throw new NormalizationException("Error reading input file!", ex);
         }
         
-        // Store the entity into the temporary file
+        // Store the entities into the temporary file
         PrintStream out = null;
         try {
             out = new PrintStream(new FileOutputStream(tmpFileName), true, "UTF8");
@@ -184,22 +190,21 @@ public class CNEN {
     }  
     
     /**
-     * Normalizes entities anotated in text with tags <ne>
-     * @param input Input file containing entities
+     * Normalizes entities marked in XML file with tags <ne>
+     * @param input Input file containing XML with entities
      * @param tmpFileName Path to a temporary file to be used by the procedure
      * @param parser Parser used to get sentence trees from the text
      * @param normalizer Normalizer used to normalize the trees
-     * @return String containing the text with anotated entities with normalized forms in normalized_name attribute
      * @throws NormalizationException Normalization failed
      */
     public static void normalizeEntitiesInText(String input, String output, String tmpFileName, SentenceTreeParser parser, TreeAction normalizer) throws NormalizationException {
         // Fetch the anotated text and get anotations
-        AnotatedText anotatedText = null;
+        AnnotatedText anotatedText = null;
         
-        AnotatedTextParser textParser = new AnotatedTextParser(input, "ne");
+        AnnotatedTextParser textParser = new AnnotatedTextParser(input, entityElement);
         try {
             anotatedText = textParser.parseText(true);
-        } catch (AnotationParsingException ex) {
+        } catch (AnnotationParsingException ex) {
             throw new NormalizationException("Error while parsing input file: \n" + ex, ex);
         }
                 
@@ -215,7 +220,7 @@ public class CNEN {
         out.print(anotatedText.getText());
         out.close();
         
-        // Parse sentence trees from the input file
+        // Parse sentence trees from the raw text file
         SentenceCollection treeList;
         try {
             treeList = parser.parseDocument(tmpFileName);
@@ -223,14 +228,15 @@ public class CNEN {
             throw new NormalizationException("Error parsing the Treex output!", ex);
         }
  
-        // Matching the trees with anotations
+        // Match the anotated text with sentence trees
         TreeTextMatcher matcher = new TreeTextMatcher(treeList);
         try {
             matcher.matchWithText(anotatedText);
         } catch (TextMatchingException ex) {
             throw new NormalizationException("Error while matching anotations with trees!", ex);
         }
-                        
+                   
+        // Run normalizer on each sentence tree
         for (SentenceTree tree: treeList.getTrees()) {
             try {
                 normalizer.runOnTree(tree);
@@ -239,9 +245,13 @@ public class CNEN {
             }
         }
         
+        // Fetch normalized names for all entities from the trees
+        // Trees were previously matched with anotations
         anotatedText.fetchNormalizedNames("normalized_name");
+        
+        // Print the normalized XML to output
         try {
-            anotatedText.generateNormalizedOutput(output);
+            anotatedText.generateOutput(output);
         } catch (DOMException ex) {
             throw new NormalizationException("Result can't be written to a file!", ex);
         }

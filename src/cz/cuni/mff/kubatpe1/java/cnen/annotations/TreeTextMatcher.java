@@ -1,13 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
-package cz.cuni.mff.kubatpe1.java.cnen.anotations;
+package cz.cuni.mff.kubatpe1.java.cnen.annotations;
 
-import cz.cuni.mff.kubatpe1.java.cnen.anotations.AnotatedText;
-import cz.cuni.mff.kubatpe1.java.cnen.anotations.EntityAnotation;
+import cz.cuni.mff.kubatpe1.java.cnen.annotations.AnnotatedText;
+import cz.cuni.mff.kubatpe1.java.cnen.annotations.EntityAnnotation;
 import cz.cuni.mff.kubatpe1.java.cnen.parsing.SentenceCollection;
 import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.SentenceTree;
 import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.TreeNode;
@@ -15,34 +10,36 @@ import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.exceptions.TextMatchingExcept
 import java.util.List;
 
 /**
- *
+ * Class for matching AnnotatedText with SenteceTree collection.
+ * Matches each entity with a set of TreeNodes of which it consists.
  * @author petrkubat
  */
 public class TreeTextMatcher {
 
-    private SentenceCollection treeSet;
+    // Collection of SentenceTrees to be matched
+    private SentenceCollection treeCollection;
     
-    public TreeTextMatcher(SentenceCollection treeSet) {
-        this.treeSet = treeSet;
+    /**
+     * Default constructor for the TreeTextMatcher class.
+     * @param treeCollection Collection of SentenceTrees to be used for matching.
+     */
+    public TreeTextMatcher(SentenceCollection treeCollection) {
+        this.treeCollection = treeCollection;
     }
     
-    public TreeTextMatcher() {
-        treeSet = new SentenceCollection();
-    }
-    
-    public void clearTreeSet() {
-        treeSet = new SentenceCollection();
-    }
-    
-    public void addTree (SentenceTree tree) {
-        treeSet.addTree(tree);
-    }
-    
-    public void matchWithText(AnotatedText text) throws TextMatchingException {
+    /**
+     * Matches SentenceTree collection stored in the matcher with specified
+     * text.
+     * For each EntityAnnotation in AnnotatedText, a set of TreeNodes of which
+ it consists is assigned.
+     * @param text AnnotatedText to be matched.
+     * @throws TextMatchingException Text doesn't correspond to the trees.
+     */
+    public void matchWithText(AnnotatedText text) throws TextMatchingException {
         // Assuming there is unlimited white space between tokens
         
         int currentPosition = 0;
-        for (SentenceTree currentTree: treeSet.getTrees()) {
+        for (SentenceTree currentTree: treeCollection.getTrees()) {
             List<TreeNode> linearTree = currentTree.getLinearRepresentation();
             
             // Skipping the first node as it is the unused root
@@ -53,12 +50,13 @@ public class TreeTextMatcher {
         
     }
     
-    private int fetchToken(AnotatedText text, int position, TreeNode currentNode) throws TextMatchingException {
+    private int fetchToken(AnnotatedText text, int position, TreeNode currentNode) throws TextMatchingException {
+        // Matches one TreeNode with part of the text, returns new position
         String originalText = text.getText();
         int currPos = skipWhiteSpace(originalText, position);
-        List<EntityAnotation> entities = text.getEntitiesAtPosition(currPos);
+        List<EntityAnnotation> entities = text.getEntitiesAtPosition(currPos);
         
-        for (EntityAnotation entity: entities) {
+        for (EntityAnnotation entity: entities) {
             int entityId = entity.getId();
             System.err.println(currentNode.toString() + " detected as part of an entity " + entityId);
             currentNode.addToEntity(entityId);
@@ -83,6 +81,8 @@ public class TreeTextMatcher {
     }
     
     private int skipWhiteSpace(String text, int position) {
+        // Skips all white space in specified String at specified position
+        // Returns new position
         while (position < text.length() && Character.isWhitespace(text.charAt(position))) {
             position++;
         }

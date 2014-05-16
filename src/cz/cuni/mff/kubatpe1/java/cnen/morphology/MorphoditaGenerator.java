@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package cz.cuni.mff.kubatpe1.java.cnen.morphology;
 
@@ -13,14 +8,22 @@ import java.io.FileNotFoundException;
 import java.util.regex.Pattern;
 
 /**
- *
+ * MorphologyGenerator implementation which uses MorphoDiTa library and java
+ * bindings.
  * @author Petr Kubat
  */
 public class MorphoditaGenerator implements MorphologyGenerator {
 
     Morpho morphology;
 
+    /**
+     * Default constructor for MorphoditaGenerator class.
+     * Requires a dictionary for MorphoDiTa library.
+     * @param dictionaryFile Path to the dictionary.
+     * @throws FileNotFoundException Dictionary doesn't exist.
+     */
     public MorphoditaGenerator(String dictionaryFile) throws FileNotFoundException {
+        // Loads the morphology from dictionary
         morphology = Morpho.load(dictionaryFile);
         if (morphology == null) {
             throw new FileNotFoundException("Dictionary file " + dictionaryFile + " doesn't exist");
@@ -29,27 +32,34 @@ public class MorphoditaGenerator implements MorphologyGenerator {
     
     @Override
     public String generateForTag(String word, Tag targetTag) throws MorphologyGeneratingException {
+        // Cleans lemma from suffixes and additional numbers
         String cleanLemma = parseLemma(word);
 
         TaggedLemmasForms lemmasForms = new TaggedLemmasForms();
         String tagString = targetTag.toString();
+        
+        // First attempt to generate
         morphology.generate(cleanLemma, tagString, 1, lemmasForms);
         
         if (lemmasForms.isEmpty()) {
-            // Can't generate exact form, we try to use wildcard
+            // Can't generate exact form, we try to use wildcard without variant
             tagString = targetTag.toWildcardString(false);
             lemmasForms = new TaggedLemmasForms();
+            // Second attempt to generate
             morphology.generate(cleanLemma, tagString, 1, lemmasForms);
             if (lemmasForms.isEmpty()) {
-                // Can't generate even for wildcard
+                // Failure again, we use wildcard with variant
                 tagString = targetTag.toWildcardString(true);
                 lemmasForms = new TaggedLemmasForms();
                 morphology.generate(cleanLemma, tagString, 1, lemmasForms);
                 if (lemmasForms.isEmpty()) {
+                    // Generation failed
                     throw new MorphologyGeneratingException("Can't generate " + tagString + " for " + cleanLemma);
                 }
             }
         }
+        
+        // Fetching the result
         TaggedForms taggedForms = lemmasForms.get(0).getForms();
         if (lemmasForms.isEmpty()) {
             throw new MorphologyGeneratingException("Can't generate " + tagString + " for " + cleanLemma);
@@ -60,10 +70,12 @@ public class MorphoditaGenerator implements MorphologyGenerator {
     
     /**
      * Parses the lemma and returns the raw lemma.
-     * @param originalLemma Original lemma generated with morphology containing additional tags
+     * @param originalLemma Original lemma generated with morphology containing
+     * additional suffixes
      * @return Clean lemma
      */
     public String parseLemma(String originalLemma) {
+        // Removing suffixes
         String[] additionSeparators = {"_:", "_;", "_,", "_^"};
         
         String currentString = originalLemma;
@@ -97,9 +109,18 @@ public class MorphoditaGenerator implements MorphologyGenerator {
         return currentString;
     }
     
+    /**
+     * Finalizer for the class.
+     * Cleans the MorphoDiTa supporting Morphology instance.
+     * @throws Throwable Finalization fails.
+     */
     @Override
-    public void finalize() {
-        morphology.delete();
+    public void finalize() throws Throwable {
+        try {
+            morphology.delete();
+        } finally {
+            super.finalize();
+        }
     }
     
 }

@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package cz.cuni.mff.kubatpe1.java.cnen.morphology;
 
@@ -10,9 +5,17 @@ import cz.cuni.mff.kubatpe1.java.cnen.morphology.exceptions.MorphologyGenerating
 import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.Tag;
 
 /**
- *
- * @author Petr
+ * Interface for classes performing the morpohological generation.
+ * @author Petr Kubat
  */
 public interface MorphologyGenerator {
+    
+    /**
+     * Generates a word form for specified lemma and tag.
+     * @param word Lemma for which we generate.
+     * @param targetTag Tag for which we generate.
+     * @return Form generated from lemma and tag.
+     * @throws MorphologyGeneratingException Generation failed.
+     */
     public String generateForTag(String word, Tag targetTag) throws MorphologyGeneratingException;
 }

@@ -1,30 +1,25 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package cz.cuni.mff.kubatpe1.java.cnen.parsing;
 
 import cz.cuni.mff.kubatpe1.java.cnen.parsing.exceptions.TreeParsingException;
-import cz.cuni.mff.kubatpe1.java.cnen.sentencetree.SentenceTree;
 import cz.cuni.mff.kubatpe1.java.cnen.treex.TreexInterface;
 import cz.cuni.mff.kubatpe1.java.cnen.treex.exceptions.TreexException;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * SentenceTreeParser implementation which creates sentence dependency trees directly from plaintext.
  * Wraps the TreexInterface and TreexParser.
  * Has a special method for parsing more documents from the same file.
- * @author petrkubat
+ * @author Petr Kubat
  */
 public class PlaintextTreexParser implements SentenceTreeParser {
-    
-    private final String treexScenario = "W2A::CS::Segment " +
+       
+    // Default scenario, is used when the scenario file is not found
+    private final String defaultScenario = "W2A::CS::Segment " +
                 "W2A::CS::Tokenize " +
                 "W2A::CS::TagFeaturama lemmatize=1 " +
                 "W2A::CS::FixMorphoErrors " +
@@ -35,6 +30,15 @@ public class PlaintextTreexParser implements SentenceTreeParser {
                 "W2A::CS::FixReflexiveTantum " +
                 "W2A::CS::FixReflexivePronouns";
     
+    // Default scenario file path
+    private final String scenarioPath = "treex_scen.txt";
+    
+    /**
+     * Runs Treex on the input plaintext and fetches result as one document.
+     * @param path Path to the source file.
+     * @return SentenceCollection containing the SentenceTrees.
+     * @throws TreeParsingException Treex run or parsing failed.
+     */
     @Override
     public SentenceCollection parseDocument(String path) throws TreeParsingException {
         List<SentenceCollection> result = runTreexAndParse(path, false);
@@ -45,10 +49,11 @@ public class PlaintextTreexParser implements SentenceTreeParser {
     }
     
     /**
-     * Parses more SentenceCollections from one file (one per line).
-     * @param path Path to source file
-     * @return List of SentenceCollectons parsed
-     * @throws TreeParsingException Parsing failed
+     * Runs Treex on the input plaintext and fetches result as set of documents
+     * (one per line). 
+     * @param path Path to the source file.
+     * @return List of SentenceCollection, each for one parsed line.
+     * @throws TreeParsingException Treex run or parsing failed.
      */
     @Override
     public List<SentenceCollection> parseDocumentSet(String path) throws TreeParsingException {
@@ -56,6 +61,28 @@ public class PlaintextTreexParser implements SentenceTreeParser {
     }
     
     private List<SentenceCollection> runTreexAndParse(String path, boolean moreDocs) throws TreeParsingException {
+        // Runs the Treex and then uses TreexParser to get SentenceTrees from the result
+        
+        // Fetch the scenario from the file
+        BufferedReader in;
+        String treexScenario;
+        try {
+            in = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(scenarioPath)));
+       
+            StringBuilder result = new StringBuilder();
+            String line;
+            while ((line = in.readLine()) != null) {
+                result.append(line);
+                result.append("\n");
+            }
+            
+            treexScenario = result.toString();
+        } catch (Exception ex) {
+            System.err.println(ex);
+            System.exit(1);
+            treexScenario = defaultScenario;
+        }
+        
         // Run the treex
         List<String> fileNames = null;
         try {

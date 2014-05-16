@@ -1,15 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package cz.cuni.mff.kubatpe1.java.cnen.tools;
 
-import cz.cuni.mff.kubatpe1.java.cnen.anotations.AnotatedText;
-import cz.cuni.mff.kubatpe1.java.cnen.anotations.AnotatedTextParser;
-import cz.cuni.mff.kubatpe1.java.cnen.anotations.AnotationParsingException;
-import cz.cuni.mff.kubatpe1.java.cnen.anotations.EntityAnotation;
+import cz.cuni.mff.kubatpe1.java.cnen.annotations.AnnotationParsingException;
 import cz.cuni.mff.kubatpe1.java.cnen.dom.DOMException;
 import cz.cuni.mff.kubatpe1.java.cnen.dom.DOMLoader;
 import java.io.BufferedReader;
@@ -61,14 +53,14 @@ public class AnotationFormatter {
             Logger.getLogger(AnotationFormatter.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(AnotationFormatter.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (AnotationParsingException ex) {
+        } catch (AnnotationParsingException ex) {
             Logger.getLogger(AnotationFormatter.class.getName()).log(Level.SEVERE, null, ex);
         } catch (DOMException ex) {
             Logger.getLogger(AnotationFormatter.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
-    public void processFile(String inFile, String outFile) throws FileNotFoundException, UnsupportedEncodingException, IOException, AnotationParsingException, DOMException {
+    private void processFile(String inFile, String outFile) throws FileNotFoundException, UnsupportedEncodingException, IOException, AnnotationParsingException, DOMException {
         // Temporary file for Treex input
         File tmpFile = null;
         try {

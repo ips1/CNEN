@@ -1,16 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package cz.cuni.mff.kubatpe1.java.cnen.dom;
 
-import cz.cuni.mff.kubatpe1.java.cnen.parsing.exceptions.TreeParsingException;
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -26,10 +18,18 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 /**
- *
+ * Class with static methods for loading and storing DOM from XML.
+ * Wrapper to the standard org.w3c.dom and org.xml.sax classes.
  * @author petrkubat
  */
 public class DOMLoader {
+    
+    /**
+     * Loads DOM document from specified XML file.
+     * @param path Path to the input file.
+     * @return DOM document loaded from the file.
+     * @throws DOMException Loading of the document failed.
+     */
     public static Document loadDOM(String path) throws DOMException {
         Document doc;
         try {
@@ -51,6 +51,12 @@ public class DOMLoader {
         return doc;
     }
     
+    /**
+     * Saves DOM document to specified XML file.
+     * @param path Path to the output file.
+     * @param document Document to be saved.
+     * @throws DOMException Saving the document failed.
+     */
     public static void saveDOM(String path, Document document) throws DOMException {
         try {
             Transformer transformer = TransformerFactory.newInstance().newTransformer();
